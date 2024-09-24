@@ -19,5 +19,9 @@ public class Biglietto {
     @JoinColumn(name = "ordine", nullable = false)
     private Ordine ordine;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "spettacolo", nullable = false)
+    private Spettacolo spettacolo;
+
     //TODO [Reverse Engineering] generate columns from DB
 }

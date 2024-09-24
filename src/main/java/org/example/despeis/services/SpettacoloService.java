@@ -9,10 +9,12 @@ import java.util.List;
 
 @Service
 public class SpettacoloService {
+
+    private final SpettacoloRepository spettacoloRepository;
     @Autowired
-    private SpettacoloRepository spettacoloRepository;
-
-
+    public SpettacoloService(SpettacoloRepository spettacoloRepository) {
+        this.spettacoloRepository = spettacoloRepository;
+    }
 
     public List<Spettacolo> getAllSpettacoli(){
         return this.spettacoloRepository.findAll();
