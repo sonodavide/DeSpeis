@@ -27,7 +27,7 @@ public class SpettacoloService {
 
 
     @Transactional(readOnly = true)
-    public List<SpettacoloDto> getAllSpettacoli(){
+    public List<SpettacoloDto> getAll(){
         ArrayList<SpettacoloDto> r = new ArrayList<>();
         for(Spettacolo s :this.spettacoloRepository.findAll()){
             r.add(spettacoloMapper.toDto(s));
@@ -35,7 +35,7 @@ public class SpettacoloService {
         return r;
     }
     @Transactional(readOnly = true)
-    public List<SpettacoloDto> getSpettacoliByDate(LocalDate date){
+    public List<SpettacoloDto> getByDate(LocalDate date){
         List<Spettacolo> spettacoli = spettacoloRepository.findAllByDataOrderByFilmTitoloAscOraAsc(date);
         return spettacoli.stream()
                 .map(spettacoloMapper::toDto)

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -41,5 +42,9 @@ public class Film {
 
     @Column(name = "img", length = Integer.MAX_VALUE)
     private String img;
+
+
+    @Column(name = "datauscita")
+    private LocalDate datauscita;
 
 }

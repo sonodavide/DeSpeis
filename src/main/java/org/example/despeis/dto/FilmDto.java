@@ -4,6 +4,7 @@ import lombok.Value;
 import org.example.despeis.model.Film;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Set;
 
 /**
@@ -15,6 +16,8 @@ public class FilmDto implements Serializable {
     String titolo;
     Integer durata;
     String trama;
+    String img;
+    LocalDate datauscita;
     Set<AttoreDto> attores;
     Set<GenereDto> generes;
     Set<RegistaDto> registas;
