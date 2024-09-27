@@ -39,4 +39,7 @@ public class Film {
     @OneToMany(mappedBy = "film")
     private Set<Spettacolo> spettacolos = new LinkedHashSet<>();
 
+    @Column(name = "img", length = Integer.MAX_VALUE)
+    private String img;
+
 }

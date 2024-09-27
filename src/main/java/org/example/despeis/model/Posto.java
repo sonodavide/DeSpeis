@@ -25,7 +25,6 @@ public class Posto {
     @JoinColumn(name = "sala", nullable = false)
     private Sala sala;
 
-    @Column(name = "occupato", nullable = false)
-    private Boolean occupato = false;
+
 
 }
