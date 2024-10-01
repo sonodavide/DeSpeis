@@ -16,22 +16,18 @@ public class FilmController {
         this.filmService = filmService;
     }
     @GetMapping
-    public ResponseEntity<?> getFilms(){
+    public ResponseEntity<?> getFilms(@RequestParam(name="id", required = false) Integer id){
+        ResponseEntity<?> r;
         try{
-            return ResponseEntity.ok(filmService.getAll());
+
+            r = id==null ? ResponseEntity.ok(filmService.getAll()) : ResponseEntity.ok(filmService.getById(id));
         }catch (Exception e){
-            return ResponseEntity.notFound().build();
+            r= ResponseEntity.notFound().build();
         }
+        return r;
     }
 
-    @GetMapping
-    public ResponseEntity<?> getFilmById(@RequestParam("id") int id) {
-        try{
-            return ResponseEntity.ok(filmService.getById(id));
-        }catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+
 
     @GetMapping("/cerca")
     public ResponseEntity<?> getFilmsByTitolo(@RequestParam("titolo") String titolo) {

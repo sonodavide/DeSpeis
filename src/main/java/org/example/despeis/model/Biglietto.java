@@ -16,12 +16,15 @@ public class Biglietto {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "utente", nullable = false)
+    private Utente utente;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ordine", nullable = false)
     private Ordine ordine;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "spettacolo", nullable = false)
-    private Spettacolo spettacolo;
+    @JoinColumn(name = "postospettacolo", nullable = false)
+    private Postispettacolo postospettacolo;
 
-    //TODO [Reverse Engineering] generate columns from DB
 }

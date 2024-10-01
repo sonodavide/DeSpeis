@@ -16,7 +16,8 @@ import java.time.LocalTime;
 @Table(name = "spettacolo")
 public class Spettacolo {
     @Id
-    @ColumnDefault("nextval('spettacolo_id_seq'::regclass)")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "spettacolo_id_gen")
+    @SequenceGenerator(name = "spettacolo_id_gen", sequenceName = "spettacolo_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -36,5 +37,14 @@ public class Spettacolo {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "film", nullable = false)
     private Film film;
+
+    @Column(name = "acquistabile", nullable = false)
+    private Boolean acquistabile;
+
+    @Column(name = "\"data fine\"")
+    private LocalDate dataFine;
+
+    @Column(name = "\"ora fine\"")
+    private LocalTime oraFine;
 
 }

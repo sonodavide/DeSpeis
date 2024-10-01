@@ -21,7 +21,5 @@ public class Sala {
     @OneToMany(mappedBy = "sala")
     private Set<Posto> postos = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "sala")
-    private Set<Spettacolo> spettacolos = new LinkedHashSet<>();
 
 }

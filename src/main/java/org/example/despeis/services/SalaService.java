@@ -21,9 +21,5 @@ public class SalaService {
         this.salaRepository = salaRepository;
         this.salaMapper = salaMapper;
     }
-    @Transactional(readOnly = true)
-    public SalaDto getSaleBySpettacoloId(Integer id){
-        Sala sala = salaRepository.findBySpettacolosId(id);
-        return salaMapper.toDto(sala);
-    }
+
 }

@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import org.example.despeis.dto.NuovoSpettacoloDto;
 import org.example.despeis.services.SpettacoloService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,16 @@ public class SpettacoloController {
             return ResponseEntity.ok(spettacoloService.getByDate(d));
         }catch(Exception e){
             return new ResponseEntity<>("no", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/nuovo")
+    public ResponseEntity<?> nuovo(@RequestBody NuovoSpettacoloDto nuovo){
+        System.out.println(nuovo.toString());
+        try{
+            return ResponseEntity.ok(spettacoloService.aggiungiSpettacolo(nuovo));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
         }
     }
 }
