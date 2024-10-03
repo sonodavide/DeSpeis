@@ -16,9 +16,8 @@ public class SpettacoloDto implements Serializable {
     LocalDate data;
     LocalTime ora;
     BigDecimal prezzo;
-    SalaDto sala;
+    Integer salaId;
     FilmDto film;
-    Boolean acquistabile;
     LocalDate dataFine;
     LocalTime oraFine;
 }

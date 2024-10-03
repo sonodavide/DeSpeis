@@ -23,4 +23,6 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
                                                @Param("data") LocalDate data,
                                                @Param("oraInizio") LocalTime oraInizio,
                                                @Param("oraFine") LocalTime oraFine);
+
+    List<Spettacolo> findByAcquistabile(boolean b);
 }
