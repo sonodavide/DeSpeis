@@ -1,11 +1,13 @@
 package org.example.despeis.services;
 
 import org.example.despeis.dto.PostispettacoloDto;
+import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.mapper.PostispettacoloMapper;
 import org.example.despeis.model.Biglietto;
 import org.example.despeis.model.Ordine;
 import org.example.despeis.model.Postispettacolo;
 import org.example.despeis.model.Utente;
+import org.example.despeis.repository.BigliettoRepository;
 import org.example.despeis.repository.OrdineRepository;
 import org.example.despeis.repository.PostispettacoloRepository;
 import org.example.despeis.repository.UtenteRepository;
@@ -25,12 +27,15 @@ public class PostiSpettacoloService {
     private final PostispettacoloMapper postiSpettacoloMapper;
     private final UtenteRepository utenteRepository;
     private final OrdineRepository ordineRepository;
+    private final BigliettoRepository bigliettoRepository;
+
     @Autowired
-    public PostiSpettacoloService(PostispettacoloRepository postiSpettacoloRepository, PostispettacoloMapper postiSpettacoloMapper, UtenteRepository utenteRepository, OrdineRepository ordineRepository) {
+    public PostiSpettacoloService(PostispettacoloRepository postiSpettacoloRepository, PostispettacoloMapper postiSpettacoloMapper, UtenteRepository utenteRepository, OrdineRepository ordineRepository, BigliettoRepository bigliettoRepository) {
         this.postiSpettacoloRepository = postiSpettacoloRepository;
         this.postiSpettacoloMapper = postiSpettacoloMapper;
         this.utenteRepository = utenteRepository;
         this.ordineRepository = ordineRepository;
+        this.bigliettoRepository = bigliettoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +48,7 @@ public class PostiSpettacoloService {
 
     @Transactional
     public boolean blocca(Set<Integer> postoId, int spettacoloId) throws Exception{
-        List<Postispettacolo> p = postiSpettacoloRepository.findByPostoIdListAndSpettacoloId(postoId, spettacoloId);
+        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(postoId);
         if(p.size()!=postoId.size()) throw new Exception("non posso prenotare tutti i posto");
         for(Postispettacolo posto : p){
             posto.setStato("bloccato");
@@ -52,23 +57,34 @@ public class PostiSpettacoloService {
         return true;
     }
     @Transactional
-    public boolean prenota(Set<Integer> postoId, int spettacoloId, int userId) throws Exception{
-        List<Postispettacolo> p = postiSpettacoloRepository.findByPostoIdListAndSpettacoloId(postoId, spettacoloId);
-        if(p.size()!=postoId.size()) throw new Exception("non posso prenotare tutti i posto");
-        ArrayList<Biglietto> biglietti;
-        Ordine ordine = new Ordine();
-        ordine.setData(LocalDate.now());
-        ordine.setStato("confermato");
-        Utente utente = utenteRepository.findById(userId).orElseThrow();
-        ordine.setUtente(utente);
-        for(Postispettacolo posto : p){
-            posto.setStato("occupato");
-            Biglietto biglietto = new Biglietto();
-            biglietto.setPostospettacolo(posto);
-            biglietto.setUtente(utente);
+    public boolean prenota(PrenotazioneRequestDto prenotazione) throws Exception{
+        try{
+
+        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(prenotazione.getPostoId());
+        if(p.size()!=prenotazione.getPostoId().size()) throw new Exception("non posso prenotare tutti i posto");
+            ArrayList<Biglietto> biglietti = new ArrayList<>();
+            Ordine ordine = new Ordine();
+            ordine.setData(LocalDate.now());
+            ordine.setStato("confermato");
+            Utente utente = utenteRepository.findById(prenotazione.getUserId()).orElseThrow();
+            ordine.setUtente(utente);
+            ordine = ordineRepository.save(ordine);
+            for(Postispettacolo posto : p){
+                posto.setStato("occupato");
+                Biglietto biglietto = new Biglietto();
+                biglietto.setPostospettacolo(posto);
+                biglietto.setUtente(utente);
+                biglietto.setOrdine(ordine);
+                biglietti.add(biglietto);
+            }
+
+            bigliettoRepository.saveAll(biglietti);
+            postiSpettacoloRepository.saveAll(p);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
         }
-        ordineRepository.save(ordine);
-        postiSpettacoloRepository.saveAll(p);
-        return true;
+
     }
 }
