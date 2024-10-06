@@ -1,6 +1,7 @@
 package org.example.despeis.controller;
 
 import org.example.despeis.dto.NuovoSpettacoloDto;
+import org.example.despeis.services.PostiSpettacoloService;
 import org.example.despeis.services.SpettacoloService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,10 @@ import java.time.LocalDate;
 public class SpettacoloController {
 
     private final SpettacoloService spettacoloService;
+    private final PostiSpettacoloService postiSpettacoloService;
     @Autowired
-    public SpettacoloController(SpettacoloService spettacoloService) {
+    public SpettacoloController(SpettacoloService spettacoloService, PostiSpettacoloService postiSpettacoloService) {
+        this.postiSpettacoloService = postiSpettacoloService;
         this.spettacoloService = spettacoloService;
     }
 
@@ -32,9 +35,18 @@ public class SpettacoloController {
 
     @PostMapping("/nuovo")
     public ResponseEntity<?> nuovo(@RequestBody NuovoSpettacoloDto nuovo){
-        System.out.println(nuovo.toString());
+
         try{
             return ResponseEntity.ok(spettacoloService.aggiungiSpettacolo(nuovo));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/sala")
+    public ResponseEntity<?> getPostiSpettacolo(@RequestParam("spettacoloId") Integer spettacoloId){
+        try{
+            return ResponseEntity.ok(postiSpettacoloService.getBySpettacoloId(spettacoloId));
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
