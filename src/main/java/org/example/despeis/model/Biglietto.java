@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Entity
@@ -26,5 +28,8 @@ public class Biglietto {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "postospettacolo", nullable = false)
     private Postispettacolo postospettacolo;
+
+    @Column(name = "prezzo")
+    private BigDecimal prezzo;
 
 }
