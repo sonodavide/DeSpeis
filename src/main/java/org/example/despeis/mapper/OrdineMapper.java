@@ -4,17 +4,20 @@ import org.example.despeis.dto.OrdineDto;
 import org.example.despeis.model.Ordine;
 import org.mapstruct.*;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING, uses = BigliettoMapper.class)
 public interface OrdineMapper {
-    Ordine toEntity(OrdineDto ordineDto);
+
+    @Mapping(source = "bigliettos", target = "bigliettos")
+    OrdineDto toDto(Ordine ordine);
 
     @AfterMapping
     default void linkBigliettos(@MappingTarget Ordine ordine) {
-        ordine.getBigliettos().forEach(biglietto -> biglietto.setOrdine(ordine));
+        if (ordine.getBigliettos() != null) {
+            ordine.getBigliettos().forEach(biglietto -> biglietto.setOrdine(ordine));
+        }
     }
 
-    @Mapping(target = "bigliettos", source = "bigliettos") // Mappatura esplicita
-    OrdineDto toDto(Ordine ordine);
+    Ordine toEntity(OrdineDto ordineDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Ordine partialUpdate(OrdineDto ordineDto, @MappingTarget Ordine ordine);
