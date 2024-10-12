@@ -1,6 +1,8 @@
 package org.example.despeis.controller;
 
 import lombok.Getter;
+import org.example.despeis.dto.FilmDto;
+import org.example.despeis.dto.NuovoFilmDto;
 import org.example.despeis.services.FilmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,15 +31,32 @@ public class FilmController {
 
 
 
-    @GetMapping("/cerca")
-    public ResponseEntity<?> getFilmsByTitolo(@RequestParam("titolo") String titolo) {
-        System.out.println(titolo);
-        System.out.println(titolo);
+
+
+    @PostMapping("/nuovo")
+    public ResponseEntity<?> nuovo(@RequestBody FilmDto film){
         try{
-            return ResponseEntity.ok(filmService.getAllByTitolo(titolo));
+            return ResponseEntity.ok(filmService.nuovoFilm(film));
         }catch (Exception e){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
     }
 
+    @PostMapping("/elimina")
+    public ResponseEntity<?> elimina(@RequestBody FilmDto film){
+        try{
+            return ResponseEntity.ok(filmService.elimina(film));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/suggest")
+    public ResponseEntity<?> suggest(@RequestParam String query) {
+        try{
+            return ResponseEntity.ok(filmService.ricerca(query));
+        }catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

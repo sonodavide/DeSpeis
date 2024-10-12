@@ -1,6 +1,7 @@
 package org.example.despeis.controller;
 
 import org.example.despeis.dto.NuovoSpettacoloDto;
+import org.example.despeis.dto.SpettacoloDto;
 import org.example.despeis.services.PostiSpettacoloService;
 import org.example.despeis.services.SpettacoloService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,10 @@ public class SpettacoloController {
     }
 
     @PostMapping("/byDate")
-    public ResponseEntity<?> getByDate(@RequestParam("date") String date){
+    public ResponseEntity<?> getFilmSpettacoloByDate(@RequestParam("date") String date){
         LocalDate d = LocalDate.parse(date);
         try{
-            return ResponseEntity.ok(spettacoloService.getByDate(d));
+            return ResponseEntity.ok(spettacoloService.getFilmSpettacoloByDate(d));
         }catch(Exception e){
             return new ResponseEntity<>(e.toString()
                     , HttpStatus.BAD_REQUEST);
@@ -43,6 +44,15 @@ public class SpettacoloController {
         }
     }
 
+    @PostMapping("elimina")
+    public ResponseEntity<?> elimina(@RequestBody SpettacoloDto spettacolo){
+        try{
+            return ResponseEntity.ok(spettacoloService.elimina(spettacolo));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/sala")
     public ResponseEntity<?> getPostiSpettacolo(@RequestParam("spettacoloId") Integer spettacoloId){
         try{
@@ -51,4 +61,16 @@ public class SpettacoloController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/ricerca")
+    public ResponseEntity<?> cercaByDate(@RequestParam("date") String date){
+        LocalDate d = LocalDate.parse(date);
+        try{
+            return ResponseEntity.ok(spettacoloService.getAllByDateRicerca(d));
+        }catch(Exception e){
+            return new ResponseEntity<>(e.toString()
+                    , HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

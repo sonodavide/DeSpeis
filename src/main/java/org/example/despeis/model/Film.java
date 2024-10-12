@@ -15,7 +15,8 @@ import java.util.Set;
 @Table(name = "film")
 public class Film {
     @Id
-    @ColumnDefault("nextval('films_id_seq'::regclass)")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "films_id_gen")
+    @SequenceGenerator(name = "films_id_gen", sequenceName = "films_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 
