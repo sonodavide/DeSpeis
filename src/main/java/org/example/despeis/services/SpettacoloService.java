@@ -7,13 +7,16 @@ import org.example.despeis.mapper.*;
 import org.example.despeis.model.*;
 import org.example.despeis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,24 +105,25 @@ public class SpettacoloService {
     }
 
     @Transactional(readOnly = true)
-    public List<NuovoSpettacoloDto> getAllByDateRicerca(LocalDate date){
-        List<Spettacolo> spettacoli = spettacoloRepository.findAllByDataOrderByFilmTitoloAscOraAsc(date);
-        List<SpettacoloRicercaDto> resRicerca = new ArrayList<>();
-        /*for(Spettacolo s : spettacoli){
-
-            SpettacoloRicercaDto risultato = new SpettacoloRicercaDto(
-
-                    nuovoSpettacoloMapper.toDto(s),
-                    getBySpettacoloId(s.getId())
-            );
-            resRicerca.add(risultato);
-
-        }
-
-        return resRicerca;*/
-        return spettacoli.stream().map(nuovoSpettacoloMapper::toDto).collect(Collectors.toList());
+    public PaginatedResponse<NuovoSpettacoloDto> cerca(LocalDate date, Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora"));
+        Page<Spettacolo> result = spettacoloRepository.findAllByDataOrderByFilmTitoloAscOraAsc(date, pageable);
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(nuovoSpettacoloMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements());
 
     }
+    @Transactional(readOnly = true)
+    public PaginatedResponse<NuovoSpettacoloDto> getAllPaginated(Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora"));
+        Page<Spettacolo> result = spettacoloRepository.findAll(pageable);
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(nuovoSpettacoloMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements());
+
+    }
+
+
     @Transactional
     public Spettacolo aggiungiSpettacolo(NuovoSpettacoloDto nuovoSpettacolo) throws Exception {
             Spettacolo s;
