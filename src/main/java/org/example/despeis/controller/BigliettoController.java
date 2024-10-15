@@ -44,6 +44,15 @@ public class BigliettoController {
 
     }
 
+    @GetMapping("/paged/user")
+    public ResponseEntity<?> getAllByUserPaged(@RequestParam Integer userId, Integer pageNumber, Integer pageSize){
+
+        try{
+            return ResponseEntity.ok(bigliettoService.getAllByUserPaginated(userId, pageNumber, pageSize));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 
 }

@@ -58,7 +58,10 @@ public class UtenteService {
         Page<Utente> result = utenteRepository.findAll(pageable);
 
         return new PaginatedResponse<>(
-                result.getContent().stream().map(utenteMapper::toDto).collect(Collectors.toList()),
+                result.getContent()
+                        .stream().
+                        map(utenteMapper::toDto)
+                        .collect(Collectors.toList()),
                 result.getTotalPages(), result.getTotalElements()
         );
     }
