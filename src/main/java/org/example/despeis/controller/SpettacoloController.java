@@ -53,7 +53,7 @@ public class SpettacoloController {
         }
     }
 
-    @GetMapping("/sala")
+    @GetMapping("/postiSpettacolo")
     public ResponseEntity<?> getPostiSpettacolo(@RequestParam("spettacoloId") Integer spettacoloId){
         try{
             return ResponseEntity.ok(postiSpettacoloService.getBySpettacoloId(spettacoloId));

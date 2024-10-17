@@ -5,10 +5,15 @@ import org.example.despeis.dto.SalaDto;
 import org.example.despeis.mapper.PostoMapper;
 import org.example.despeis.mapper.SalaMapper;
 import org.example.despeis.model.Posto;
+import org.example.despeis.model.Regista;
 import org.example.despeis.model.Sala;
 import org.example.despeis.repository.PostoRepository;
 import org.example.despeis.repository.SalaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +57,24 @@ public class SalaService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<SalaDto> getAllPaginated(Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id"));
+        Page<Sala> result = salaRepository.findAll(pageable);
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(salaMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public SalaConPostiPerFilaDto getSalaConPostiPerFila(SalaDto sala){
+        SalaConPostiPerFilaDto response = new SalaConPostiPerFilaDto(
+                sala, postoRepository.countSediliBySalaGroupByFila(sala.getId()).stream()
+                .collect(Collectors.toMap(PostoRepository.FilaSediliCount::getFila, PostoRepository.FilaSediliCount::getNumeroSedili))
+        );
+        return response;
 
     }
 }
