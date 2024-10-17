@@ -19,7 +19,6 @@ public class Sala {
     private Integer id;
 
     @OneToMany(mappedBy = "sala")
-    private Set<Posto> postos = new LinkedHashSet<>();
-
+    private Set<Posti> postis = new LinkedHashSet<>();
 
 }

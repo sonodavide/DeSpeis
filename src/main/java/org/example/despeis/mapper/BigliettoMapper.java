@@ -10,7 +10,8 @@ public interface BigliettoMapper {
 
     @Mapping(source = "utente.id", target = "utenteId")
     @Mapping(source = "ordine.id", target = "ordineId")
-    @Mapping(source = "postospettacolo.posto", target = "postospettacoloPosto")
+    @Mapping(source = "postospettacolo.sedile", target = "postospettacoloSedile")
+    @Mapping(source = "postospettacolo.fila", target = "postospettacoloFila")
     @Mapping(source = "postospettacolo.spettacolo.data", target = "postospettacoloSpettacoloData")
     @Mapping(source = "postospettacolo.spettacolo.ora", target = "postospettacoloSpettacoloOra")
     @Mapping(source = "postospettacolo.spettacolo.sala.id", target = "postospettacoloSpettacoloSalaId")

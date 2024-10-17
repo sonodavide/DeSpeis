@@ -15,7 +15,8 @@ public class BigliettoDto implements Serializable {
     Integer id;
     Integer utenteId;
     Integer ordineId;
-    PostoDto postospettacoloPosto;
+    Integer postospettacoloSedile;
+    String postospettacoloFila;
     LocalDate postospettacoloSpettacoloData;
     LocalTime postospettacoloSpettacoloOra;
     Integer postospettacoloSpettacoloSalaId;

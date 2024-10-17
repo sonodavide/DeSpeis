@@ -1,15 +1,15 @@
 package org.example.despeis.mapper;
 
-import org.example.despeis.dto.PostoDto;
-import org.example.despeis.model.Posto;
+import org.example.despeis.dto.PostiDto;
+import org.example.despeis.model.Posti;
 import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
-public interface PostoMapper {
-    Posto toEntity(PostoDto postoDto);
+public interface PostiMapper {
+    Posti toEntity(PostiDto postiDto);
 
-    PostoDto toDto(Posto posto);
+    PostiDto toDto(Posti posti);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Posto partialUpdate(PostoDto postoDto, @MappingTarget Posto posto);
+    Posti partialUpdate(PostiDto postiDto, @MappingTarget Posti posti);
 }

@@ -1,16 +1,15 @@
 package org.example.despeis.dto;
 
 import lombok.Value;
-import org.example.despeis.model.Posto;
 
 import java.io.Serializable;
 
 /**
- * DTO for {@link Posto}
+ * DTO for {@link org.example.despeis.model.Posti}
  */
 @Value
-public class PostoDto implements Serializable {
+public class PostiDto implements Serializable {
     Integer id;
     String fila;
-    Integer sedile;
+    Integer sedili;
 }
