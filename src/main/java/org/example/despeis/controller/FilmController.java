@@ -69,4 +69,13 @@ public class FilmController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<?> count(){
+        try{
+            return ResponseEntity.ok(filmService.count());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

@@ -40,6 +40,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.aggiungiSpettacolo(nuovo));
         }catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
@@ -85,6 +86,13 @@ public class SpettacoloController {
 
 
 
-
+    @GetMapping("/count")
+    public ResponseEntity<?> count(){
+        try{
+            return ResponseEntity.ok(spettacoloService.count());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 }

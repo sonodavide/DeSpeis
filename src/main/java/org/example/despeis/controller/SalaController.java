@@ -52,4 +52,12 @@ public class SalaController {
         return ResponseEntity.ok(salaService.delete(sala));
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<?> count(){
+        try{
+            return ResponseEntity.ok(salaService.count());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

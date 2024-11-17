@@ -48,4 +48,14 @@ public class OrdineService {
                 .map(ordineMapper::toDto)
                 .collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
+
+    @Transactional(readOnly = true)
+    public Long count(){
+        return ordineRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public Double incassiTotali(){
+        return ordineRepository.sumAllTotale();
+    }
 }

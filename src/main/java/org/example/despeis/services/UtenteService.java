@@ -77,4 +77,8 @@ public class UtenteService {
     public UtenteDto nuovo(UtenteDto utenteDto){
         return utenteMapper.toDto(utenteRepository.save(utenteMapper.toEntity(utenteDto)));
     }
+    @Transactional(readOnly = true)
+    public Long count(){
+        return utenteRepository.count();
+    }
 }

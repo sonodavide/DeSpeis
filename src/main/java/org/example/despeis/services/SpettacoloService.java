@@ -32,7 +32,7 @@ public class SpettacoloService {
     private final FilmRepository filmRepository;
     private final SalaRepository salaRepository;
     private final PostispettacoloRepository postispettacoloRepository;
-
+    private final PostiRepository postiRepository;
     private final SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper;
     private final FilmMapper filmMapper;
     private final NuovoSpettacoloMapper nuovoSpettacoloMapper;
@@ -41,13 +41,13 @@ public class SpettacoloService {
 
 
     @Autowired
-    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostispettacoloMapper postispettacoloMapper, SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper, FilmMapper filmMapper, NuovoSpettacoloMapper nuovoSpettacoloMapper, PostiMapper postiMapper, SalaMapper salaMapper) {
+    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostispettacoloMapper postispettacoloMapper, SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper, FilmMapper filmMapper, NuovoSpettacoloMapper nuovoSpettacoloMapper, PostiMapper postiMapper, SalaMapper salaMapper, PostiRepository postiRepository) {
         this.spettacoloRepository = spettacoloRepository;
         this.spettacoloMapper = spettacoloMapper;
         this.filmRepository = filmRepository;
         this.salaRepository = salaRepository;
         this.postispettacoloRepository = postispettacoloRepository;
-
+        this.postiRepository = postiRepository;
         this.spettacoloSenzaFilmMapper = spettacoloSenzaFilmMapper;
         this.filmMapper = filmMapper;
         this.nuovoSpettacoloMapper =  nuovoSpettacoloMapper;
@@ -143,8 +143,13 @@ public class SpettacoloService {
                     Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
                     LocalDateTime inizio = LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra());
                     LocalDateTime fine = inizio.plus(durata);
-                    List<Spettacolo> spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(nuovoSpettacolo.getSala().getId(), nuovoSpettacolo.getData(), nuovoSpettacolo.getOra(), fine.toLocalTime());
+                    List<Integer> spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(nuovoSpettacolo.getSala().getId(),
+                            nuovoSpettacolo.getData(),
+                            nuovoSpettacolo.getOra(),
+                            fine.toLocalDate(),
+                            fine.toLocalTime());
                     if(!spettacoliProblematici.isEmpty()){
+                        System.out.println("sala occupata a quell'ora");
                         throw new Exception("La sala è occupata in quell'orario.");
                     }
                     s.setFilm(nuovoFilm);
@@ -153,19 +158,22 @@ public class SpettacoloService {
 
         List<Postispettacolo> psList = new ArrayList<>();
             if(nuovoSpettacolo.getSala()!=null){
-                Sala nuovaSala = salaMapper.toEntity(nuovoSpettacolo.getSala());
-                if(s.getSala() == null || !s.getSala().equals(nuovaSala)) {
-                    postispettacoloRepository.deleteBySpettacoloId(s.getId());
+                Sala nuovaSala = salaMapper.toEntity(nuovoSpettacolo.getSala()); //devo fare un check se riesce a castare ad entity o mi da null
+
+                if( s.getSala() == null || !s.getSala().equals(nuovaSala)) {
+                    if(s.getId()!=null){
+                        postispettacoloRepository.deleteBySpettacoloId(s.getId());
+                    }
                     s.setSala(nuovaSala);
 
-                    for (Posti p : nuovaSala.getPostis()) {
+                    for (Posti p : postiRepository.findAllBySala(nuovaSala)) {
                         for(int i=1;i<=p.getSedili();i++){
-                        Postispettacolo ps = new Postispettacolo();
-                        ps.setStato("libero");
-                        ps.setSedile(i);
-                        ps.setFila(p.getFila());
-                        ps.setSpettacolo(s);
-                        psList.add(ps);
+                            Postispettacolo ps = new Postispettacolo();
+                            ps.setStato("libero");
+                            ps.setSedile(i);
+                            ps.setFila(p.getFila());
+                            ps.setSpettacolo(s);
+                            psList.add(ps);
 
                         }
                     }
@@ -211,4 +219,8 @@ public class SpettacoloService {
         return new PostiSpettacoloResponseDto(spettacoloId, tempMap);
     }
 
+    @Transactional(readOnly = true)
+    public Long count(){
+        return spettacoloRepository.count();
+    }
 }

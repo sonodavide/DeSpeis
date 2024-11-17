@@ -70,4 +70,9 @@ public class GenereService {
                 result.getTotalPages(), result.getTotalElements());
 
     }
+
+    @Transactional(readOnly = true)
+    public Long count(){
+        return genereRepository.count();
+    }
 }

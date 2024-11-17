@@ -54,5 +54,12 @@ public class BigliettoController {
         }
     }
 
-
+    @GetMapping("/count")
+    public ResponseEntity<?> count(){
+        try{
+            return ResponseEntity.ok(bigliettoService.count());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

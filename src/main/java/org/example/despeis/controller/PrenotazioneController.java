@@ -27,10 +27,10 @@ public class PrenotazioneController {
         }
     }
 
-    @GetMapping("/blocca")
-    public ResponseEntity<?> blocca(@RequestParam Set<Integer> postoId, @RequestParam int spettacoloId){
+    @PostMapping("/blocca")
+    public ResponseEntity<?> blocca(@RequestBody PrenotazioneRequestDto prenotazioneRequestDto){
         try{
-            return ResponseEntity.ok(postiSpettacoloService.blocca(postoId));
+            return ResponseEntity.ok(postiSpettacoloService.blocca(prenotazioneRequestDto));
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
