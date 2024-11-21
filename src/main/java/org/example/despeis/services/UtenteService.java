@@ -7,11 +7,13 @@ import org.example.despeis.mapper.UtenteMapper;
 import org.example.despeis.model.Utente;
 import org.example.despeis.model.Utente;
 import org.example.despeis.repository.UtenteRepository;
+import org.example.despeis.security.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +32,14 @@ public class UtenteService {
     }
 
     @Transactional(readOnly = true)
-    public UtenteDto getById(Integer id) {
+    public UtenteDto getById(String id) {
         return utenteMapper.toDto(utenteRepository.findById(id).orElseThrow());
     }
 
+    @Transactional(readOnly = true)
+    public UtenteDto getById(JwtAuthenticationToken authenticationToken){
+        return getById(Utils.getUserId(authenticationToken));
+    }
     @Transactional(readOnly = true)
     public List<UtenteDto> getAll(){
         return utenteRepository.findAll().stream()
@@ -70,7 +76,7 @@ public class UtenteService {
         utenteRepository.delete(utenteMapper.toEntity(utenteDto));
     }
     @Transactional
-    public void delete(Integer utenteId){
+    public void delete(String utenteId){
         utenteRepository.deleteById(utenteId);
     }
     @Transactional

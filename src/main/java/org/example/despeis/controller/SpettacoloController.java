@@ -7,6 +7,7 @@ import org.example.despeis.services.SpettacoloService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ public class SpettacoloController {
         this.spettacoloService = spettacoloService;
     }
 
+    //QUESTO E' QUELLO DEL SITO.
     @PostMapping("/byDate")
     public ResponseEntity<?> getFilmSpettacoloByDate(@RequestParam("date") String date){
         LocalDate d = LocalDate.parse(date);
@@ -33,7 +35,7 @@ public class SpettacoloController {
                     , HttpStatus.BAD_REQUEST);
         }
     }
-
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("/nuovo")
     public ResponseEntity<?> nuovo(@RequestBody NuovoSpettacoloDto nuovo){
 
@@ -44,7 +46,7 @@ public class SpettacoloController {
             return ResponseEntity.badRequest().build();
         }
     }
-
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("elimina")
     public ResponseEntity<?> elimina(@RequestBody SpettacoloDto spettacolo){
         try{
@@ -62,9 +64,9 @@ public class SpettacoloController {
             return ResponseEntity.badRequest().build();
         }
     }
-
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/cerca")
-    public ResponseEntity<?> cercaByDate(@RequestParam("date") String date, Integer pageNumber, Integer pageSize){
+    public ResponseEntity<?> cercaByDate(@RequestParam("date") String date, @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
         LocalDate d = LocalDate.parse(date);
         try{
             return ResponseEntity.ok(spettacoloService.cerca(d, pageNumber, pageSize));
@@ -73,9 +75,9 @@ public class SpettacoloController {
                     , HttpStatus.BAD_REQUEST);
         }
     }
-
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/paged")
-    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+    public ResponseEntity<?> getAllPaged(@RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
 
         try{
             return ResponseEntity.ok(spettacoloService.getAllPaginated(pageNumber, pageSize));
@@ -85,7 +87,7 @@ public class SpettacoloController {
     }
 
 
-
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/count")
     public ResponseEntity<?> count(){
         try{

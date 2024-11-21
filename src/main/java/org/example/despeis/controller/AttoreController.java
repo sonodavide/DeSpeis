@@ -5,6 +5,7 @@ import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.services.AttoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,7 +27,7 @@ public class AttoreController {
         }
     }
     @GetMapping("/paged")
-    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+    public ResponseEntity<?> getAllPaged(@RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
 
         try{
             return ResponseEntity.ok(attoreService.getAllPaginated(pageNumber, pageSize));
@@ -35,7 +36,7 @@ public class AttoreController {
         }
     }
     @GetMapping("/cerca")
-    public ResponseEntity<?> ricerca(@RequestParam String query, Integer pageNumber, Integer pageSize) {
+    public ResponseEntity<?> ricerca(@RequestParam String query, @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize) {
         try{
             return ResponseEntity.ok(attoreService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
@@ -43,7 +44,7 @@ public class AttoreController {
         }
     }
 
-
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("/nuovo")
     public ResponseEntity<?> nuovo(@RequestBody AttoreDto attoreDto){
         try{
@@ -52,7 +53,7 @@ public class AttoreController {
             return ResponseEntity.badRequest().build();
         }
     }
-
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
     public ResponseEntity<?> elimina(@RequestBody AttoreDto attoreDto){
         try{
@@ -62,7 +63,7 @@ public class AttoreController {
             return ResponseEntity.badRequest().build();
         }
     }
-
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/count")
     public ResponseEntity<?> count(){
         try{

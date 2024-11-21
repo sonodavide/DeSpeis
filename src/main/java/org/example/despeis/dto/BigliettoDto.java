@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Value
 public class BigliettoDto implements Serializable {
     Integer id;
-    Integer utenteId;
+    String utenteId;
     Integer ordineId;
     Integer postospettacoloSedile;
     String postospettacoloFila;

@@ -36,8 +36,7 @@ public class SecurityConfiguration {
                 .cors(c->corsConfigurationSource())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.anyRequest()
-                                .permitAll()//authenticated()
+                        req.anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(auth ->
                         auth.jwt(token -> token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter(utenteService))));
