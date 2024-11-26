@@ -51,6 +51,7 @@ public class BigliettoService {
     public PaginatedResponse<BigliettoDto> getByUser(String userId, int pageNumber, int pageSize){
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
         Page<Biglietto> result = bigliettoRepository.findByUtenteId(userId, pageable);
+
         return new PaginatedResponse<BigliettoDto>(result.getContent().stream()
                 .map(bigliettoMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }

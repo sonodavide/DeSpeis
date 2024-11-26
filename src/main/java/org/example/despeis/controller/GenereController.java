@@ -63,4 +63,12 @@ public class GenereController {
             return ResponseEntity.badRequest().build();
         }
     }
+    @GetMapping("/getNomeById")
+    public ResponseEntity<?> getNomeById(@RequestParam Integer id){
+        try{
+            return ResponseEntity.ok(genereService.getNomeById(id));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

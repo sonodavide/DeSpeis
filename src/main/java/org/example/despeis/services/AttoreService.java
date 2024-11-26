@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,5 +70,11 @@ public class AttoreService {
     @Transactional(readOnly = true)
     public Long count(){
         return attoreRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public String getNomeById(Integer id){
+        Attore attore = attoreRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        return attore.getNome() + " " + attore.getCognome();
     }
 }

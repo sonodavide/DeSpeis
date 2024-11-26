@@ -78,4 +78,15 @@ public class UtenteController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/update")
+    public ResponseEntity<?> update(JwtAuthenticationToken authenticationToken){
+        try{
+            utenteService.update(authenticationToken);
+            return ResponseEntity.ok().build();
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

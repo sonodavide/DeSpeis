@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,5 +75,11 @@ public class GenereService {
     @Transactional(readOnly = true)
     public Long count(){
         return genereRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public String getNomeById(Integer id){
+        Genere genere = genereRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        return genere.getGenere();
     }
 }
