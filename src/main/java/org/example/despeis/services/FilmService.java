@@ -3,6 +3,7 @@ package org.example.despeis.services;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.FilmDto;
 import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.AttoreMapper;
@@ -19,6 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -36,9 +40,10 @@ public class FilmService {
     private final GenerefilmRepository generefilmRepository;
     private final RegiafilmRepository regiafilmRepository;
     private final AttorefilmRepository attorefilmRepository;
+    private final SpettacoloRepository spettacoloRepository;
 
     @Autowired
-    public FilmService(FilmRepository filmRepository, FilmMapper filmMapper, AttoreMapper attoreMapper, RegistaMapper registaMapper, GenereMapper genereMapper, GenerefilmRepository generefilmRepository, RegiafilmRepository regiafilmRepository, AttorefilmRepository attorefilmRepository) {
+    public FilmService(FilmRepository filmRepository, FilmMapper filmMapper, AttoreMapper attoreMapper, RegistaMapper registaMapper, GenereMapper genereMapper, GenerefilmRepository generefilmRepository, RegiafilmRepository regiafilmRepository, AttorefilmRepository attorefilmRepository, SpettacoloRepository spettacoloRepository) {
         this.filmRepository = filmRepository;
         this.filmMapper = filmMapper;
         this.attoreMapper = attoreMapper;
@@ -47,6 +52,7 @@ public class FilmService {
         this.generefilmRepository = generefilmRepository;
         this.regiafilmRepository = regiafilmRepository;
         this.attorefilmRepository = attorefilmRepository;
+        this.spettacoloRepository = spettacoloRepository;
     }
 
     @Transactional(readOnly = true)
@@ -68,57 +74,80 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
     @Transactional
-    public FilmDto nuovoFilm(FilmDto nuovoFilm){
-        try{
-            Film film;
-            if(nuovoFilm.getId()==null){
-                film = new Film();
-            } else{
-                film = entityManager.find(Film.class, nuovoFilm.getId(), LockModeType.PESSIMISTIC_WRITE);
+    public FilmDto nuovoFilm(FilmDto nuovoFilm) throws Exception {
+        //creo/modifico il film
+        List<Spettacolo> spettacoliConStoFilm = new ArrayList<>();
 
-            }
-            film.setDatauscita(nuovoFilm.getDatauscita());
-            film.setTitolo(nuovoFilm.getTitolo());
-            film.setDurata(nuovoFilm.getDurata());
-            film.setTrama(nuovoFilm.getTrama());
-            film.setImg(nuovoFilm.getImg());
-            Film f = filmRepository.save(film);
+        Film film;
+        if(nuovoFilm.getId()==null){
+            film = new Film();
+        } else{
+            film = entityManager.find(Film.class, nuovoFilm.getId(), LockModeType.PESSIMISTIC_WRITE);
+            if(film==null) throw new BadRequestException();
+            spettacoliConStoFilm = spettacoloRepository.findProssimiSpettacoliByFilm(film);
 
-            Set<Genere> generi = nuovoFilm.getGeneres().stream().map(genereMapper::toEntity).collect(Collectors.toSet());
-            for(Genere genere : generi){
-                Generefilm genereFilm = new Generefilm();
-                GenerefilmId genereFilmId = new GenerefilmId();
-                genereFilmId.setFilm(f.getId());
-                genereFilmId.setGenere(genere.getId());
-                genereFilm.setId(genereFilmId);
-                genereFilm.setFilm(film);
-                generefilmRepository.save(genereFilm);
-            }
-            Set<Attore> attori = nuovoFilm.getAttores().stream().map(attoreMapper::toEntity).collect(Collectors.toSet());
-            for(Attore attore : attori){
-                Attorefilm attorefilm = new Attorefilm();
-                AttorefilmId attorefilmId = new AttorefilmId();
-                attorefilmId.setFilm(film.getId());
-                attorefilmId.setAttore(attore.getId());
-                attorefilm.setId(attorefilmId);
-                attorefilm.setFilm(film);
-                attorefilmRepository.save(attorefilm);
-            }
-            Set<Regista> registi = nuovoFilm.getRegistas().stream().map(registaMapper::toEntity).collect(Collectors.toSet());
-            for(Regista regista : registi){
-                Regiafilm regiafilm = new Regiafilm();
-                RegiafilmId regiafilmId = new RegiafilmId();
-                regiafilmId.setFilm(film.getId());
-                regiafilmId.setRegista(regista.getId());
-                regiafilm.setId(regiafilmId);
-                regiafilm.setFilm(film);
-                regiafilmRepository.save(regiafilm);
-            }
-            return filmMapper.toDto(f);
-        }catch (Exception e){
-            e.printStackTrace();
-            return null;
         }
+        System.out.println(spettacoliConStoFilm.toString());
+        film.setDatauscita(nuovoFilm.getDatauscita());
+        film.setTitolo(nuovoFilm.getTitolo());
+        film.setDurata(nuovoFilm.getDurata());
+        film.setTrama(nuovoFilm.getTrama());
+        film.setImg(nuovoFilm.getImg());
+        Film f = filmRepository.save(film);
+
+        //controllo se si creano accavallamenti di spettacoli
+        if(!spettacoliConStoFilm.isEmpty()){
+            for(Spettacolo spettacolo : spettacoliConStoFilm){
+                Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
+                LocalDateTime inizio = LocalDateTime.of(spettacolo.getData(), spettacolo.getOra());
+                LocalDateTime fine = inizio.plus(durata);
+                spettacolo.setDataFine(fine.toLocalDate());
+                spettacolo.setOraFine(fine.toLocalTime());
+                List<Integer> spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(spettacolo.getSala().getId(),
+                        spettacolo.getData(),
+                        spettacolo.getOra(),
+                        spettacolo.getDataFine(),
+                        spettacolo.getOraFine());
+                if(!spettacoliProblematici.isEmpty()){
+                    System.out.println("accavallamento");
+                    throw new IllegalStateException("Accavallamento");
+                }
+            }
+        }
+
+        //aggiorno i tag
+        Set<Genere> generi = nuovoFilm.getGeneres().stream().map(genereMapper::toEntity).collect(Collectors.toSet());
+        for(Genere genere : generi){
+            Generefilm genereFilm = new Generefilm();
+            GenerefilmId genereFilmId = new GenerefilmId();
+            genereFilmId.setFilm(f.getId());
+            genereFilmId.setGenere(genere.getId());
+            genereFilm.setId(genereFilmId);
+            genereFilm.setFilm(film);
+            generefilmRepository.save(genereFilm);
+        }
+        Set<Attore> attori = nuovoFilm.getAttores().stream().map(attoreMapper::toEntity).collect(Collectors.toSet());
+        for(Attore attore : attori){
+            Attorefilm attorefilm = new Attorefilm();
+            AttorefilmId attorefilmId = new AttorefilmId();
+            attorefilmId.setFilm(film.getId());
+            attorefilmId.setAttore(attore.getId());
+            attorefilm.setId(attorefilmId);
+            attorefilm.setFilm(film);
+            attorefilmRepository.save(attorefilm);
+        }
+        Set<Regista> registi = nuovoFilm.getRegistas().stream().map(registaMapper::toEntity).collect(Collectors.toSet());
+        for(Regista regista : registi){
+            Regiafilm regiafilm = new Regiafilm();
+            RegiafilmId regiafilmId = new RegiafilmId();
+            regiafilmId.setFilm(film.getId());
+            regiafilmId.setRegista(regista.getId());
+            regiafilm.setId(regiafilmId);
+            regiafilm.setFilm(film);
+            regiafilmRepository.save(regiafilm);
+        }
+        return filmMapper.toDto(f);
+
 
 
 

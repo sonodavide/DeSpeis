@@ -1,5 +1,6 @@
 package org.example.despeis.services;
 
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.dto.GenereDto;
 import org.example.despeis.dto.PaginatedResponse;
@@ -38,7 +39,8 @@ public class GenereService {
         genereRepository.deleteById(genereId);
     }
     @Transactional
-    public GenereDto nuovo(GenereDto genereDto){
+    public GenereDto nuovo(GenereDto genereDto) throws BadRequestException {
+        if(genereDto.getGenere().trim().equals("")) throw new BadRequestException();
         return genereMapper.toDto(genereRepository.save(genereMapper.toEntity(genereDto)));
     }
 

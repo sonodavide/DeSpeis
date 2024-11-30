@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import org.apache.coyote.BadRequestException;
 import org.apache.coyote.Response;
 import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.services.AttoreService;
@@ -23,7 +24,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.getAll());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @GetMapping("/paged")
@@ -32,7 +33,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @GetMapping("/cerca")
@@ -40,7 +41,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -49,8 +50,11 @@ public class AttoreController {
     public ResponseEntity<?> nuovo(@RequestBody AttoreDto attoreDto){
         try{
             return ResponseEntity.ok(attoreService.nuovo(attoreDto));
-        }catch (Exception e){
+        }catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -58,9 +62,9 @@ public class AttoreController {
     public ResponseEntity<?> elimina(@RequestBody AttoreDto attoreDto){
         try{
             attoreService.delete(attoreDto);
-            return ResponseEntity.ok("ok");
+            return ResponseEntity.ok().build();
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -69,7 +73,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -78,7 +82,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.getNomeById(id));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

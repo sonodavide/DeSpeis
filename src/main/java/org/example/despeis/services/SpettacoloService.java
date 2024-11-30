@@ -2,6 +2,7 @@ package org.example.despeis.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.*;
 import org.example.despeis.mapper.*;
 import org.example.despeis.model.*;
@@ -71,8 +72,9 @@ public class SpettacoloService {
         }
         return r;
     }
+
     @Transactional(readOnly = true)
-    public List<FilmSpettacoliDto> getFilmSpettacoloByDate(LocalDate date) throws Exception {
+    public List<FilmSpettacoliDto> getFilmSpettacoloAcquistabileByDate(LocalDate date) throws Exception {
         try{
             List<Spettacolo> spettacoli = spettacoloRepository.findAllByDataAndAcquistabileOrderByFilmTitoloAscOraAsc(date, true);
 
@@ -124,25 +126,32 @@ public class SpettacoloService {
 
     @Transactional
     public Spettacolo aggiungiSpettacolo(NuovoSpettacoloDto nuovoSpettacolo) throws Exception {
-            Spettacolo s;
+        //mettere che si può cambiare il prezzo del biglietto anche se ci sta gente prenotata
+        if(nuovoSpettacolo.getPrezzo()<0) throw new BadRequestException();
+        Spettacolo s;
             if (nuovoSpettacolo.getId() == null) {
                 s = new Spettacolo();
 
             } else {
-                s = spettacoloRepository.findById(nuovoSpettacolo.getId()).orElseThrow();
+                s = spettacoloRepository.findById(nuovoSpettacolo.getId()).orElseThrow(() -> new BadRequestException());
 
                 if (!postispettacoloRepository.findBySpettacoloIdAndStato(s.getId(), "prenotato").isEmpty())
-                    throw new Exception("impossibile effettuare modifiche. Ci sta gente prenotata");
+                    throw new IllegalStateException("impossibile effettuare modifiche. Ci sta gente prenotata");
             }
             s.setAcquistabile(nuovoSpettacolo.getAcquistabile());
             s.setPrezzo(nuovoSpettacolo.getPrezzo());
 
             if(nuovoSpettacolo.getFilm()!=null){
-                Film nuovoFilm = filmMapper.toEntity(nuovoSpettacolo.getFilm());
+                //Film nuovoFilm = filmMapper.toEntity(nuovoSpettacolo.getFilm()); //qui va messo un lock sul film. Credo proprio optimistic dato che è raro che vengano fatte modifiche
+                Film nuovoFilm = filmRepository.findById(nuovoSpettacolo.getFilm().getId()).orElseThrow(() -> new BadRequestException());
                 if(s.getFilm()==null || !s.getFilm().equals(nuovoFilm)){
                     Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
                     LocalDateTime inizio = LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra());
                     LocalDateTime fine = inizio.plus(durata);
+                    s.setData(nuovoSpettacolo.getData());
+                    s.setOra(nuovoSpettacolo.getOra());
+                    s.setDataFine(inizio.toLocalDate());
+                    s.setOraFine(fine.toLocalTime());
                     List<Integer> spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(nuovoSpettacolo.getSala().getId(),
                             nuovoSpettacolo.getData(),
                             nuovoSpettacolo.getOra(),
@@ -158,15 +167,16 @@ public class SpettacoloService {
 
         List<Postispettacolo> psList = new ArrayList<>();
             if(nuovoSpettacolo.getSala()!=null){
-                Sala nuovaSala = salaMapper.toEntity(nuovoSpettacolo.getSala()); //devo fare un check se riesce a castare ad entity o mi da null
 
+                Sala nuovaSala = salaRepository.findById(nuovoSpettacolo.getSala().getId()).orElseThrow(() -> new BadRequestException());
                 if( s.getSala() == null || !s.getSala().equals(nuovaSala)) {
                     if(s.getId()!=null){
                         postispettacoloRepository.deleteBySpettacoloId(s.getId());
                     }
                     s.setSala(nuovaSala);
-
-                    for (Posti p : postiRepository.findAllBySala(nuovaSala)) {
+                    List<Posti> posti = postiRepository.findAllBySala(nuovaSala);
+                    if(posti.isEmpty()) throw new BadRequestException();
+                    for (Posti p : posti) {
                         for(int i=1;i<=p.getSedili();i++){
                             Postispettacolo ps = new Postispettacolo();
                             ps.setStato("libero");

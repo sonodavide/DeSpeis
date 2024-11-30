@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.services.PostiSpettacoloService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class PrenotazioneController {
         try{
             return ResponseEntity.ok(postiSpettacoloService.prenota(authenticationToken, prenotazioneRequestDto));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -33,8 +34,11 @@ public class PrenotazioneController {
     public ResponseEntity<?> blocca(@RequestBody PrenotazioneRequestDto prenotazioneRequestDto){
         try{
             return ResponseEntity.ok(postiSpettacoloService.blocca(prenotazioneRequestDto));
-        }catch (Exception e){
+        }catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
     }
 

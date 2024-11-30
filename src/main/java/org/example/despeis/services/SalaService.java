@@ -2,6 +2,7 @@ package org.example.despeis.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.*;
 import org.example.despeis.dto.SalaDto;
 import org.example.despeis.mapper.PostiMapper;
@@ -59,13 +60,13 @@ public class SalaService {
         return true;
     }
     @Transactional
-    public SalaDto nuovo(SalaConPostiDto salaDto){
+    public SalaDto nuovo(SalaConPostiDto salaDto) throws BadRequestException{
         try{
             Sala nuovaSala;
             if(salaDto.getId() == null){
                 nuovaSala = new Sala();
             } else {
-                nuovaSala = salaRepository.findById(salaDto.getId()).orElseThrow();
+                nuovaSala = salaRepository.findById(salaDto.getId()).orElseThrow(() -> new BadRequestException());
                 /*
                 controllo se ci sono spettacoli acquistabili con questa sala. In caso,
                 ne impedisco la modifica.

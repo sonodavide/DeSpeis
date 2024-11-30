@@ -3,6 +3,7 @@ package org.example.despeis.services;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.PostiSpettacoloResponseDto;
 import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.mapper.PostispettacoloMapper;
@@ -61,13 +62,13 @@ public class PostiSpettacoloService {
     }
 
     @Transactional
-    public PostiSpettacoloResponseDto blocca(PrenotazioneRequestDto prenotazioneRequestDto) throws Exception{
+    public PostiSpettacoloResponseDto blocca(PrenotazioneRequestDto prenotazioneRequestDto) throws BadRequestException{
         if(prenotazioneRequestDto.getPostiIds().size()==0){
-            throw new Exception("Errore lista vuota");
+            throw new BadRequestException("dati non validi");
         }
         List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndNotPrenotati(prenotazioneRequestDto.getPostiIds());
 
-        if(p.size()!=prenotazioneRequestDto.getPostiIds().size()) throw new Exception("posto/i già prenotati");
+        if(p.size()!=prenotazioneRequestDto.getPostiIds().size()) throw new BadRequestException("dati non validi");
         for(Postispettacolo posto : p){
             if(posto.getStato().equals("bloccato")){
                 posto.setStato("libero");
@@ -83,10 +84,10 @@ public class PostiSpettacoloService {
         try{
         String userId = Utils.getUserId(authenticationToken);
         Spettacolo spettacolo =entityManager.find(Spettacolo.class, prenotazione.getSpettacoloId(), LockModeType.PESSIMISTIC_READ);
-        if(!spettacolo.getAcquistabile()) throw new Exception("non è acquistabile");
+        if(spettacolo == null || !spettacolo.getAcquistabile()) throw new BadRequestException();
         List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(prenotazione.getPostiIds());
         if(p.size()!=prenotazione.getPostiIds().size()) {
-            throw new Exception("posto/i già prenotati");
+            throw new IllegalStateException("posto/i già prenotati");
         }
             ArrayList<Biglietto> biglietti = new ArrayList<>();
             Ordine ordine = new Ordine();

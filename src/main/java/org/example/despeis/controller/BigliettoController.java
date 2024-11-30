@@ -29,7 +29,7 @@ public class BigliettoController {
         try{
             return ResponseEntity.ok(bigliettoService.getByUser(authenticationToken,pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -38,7 +38,7 @@ public class BigliettoController {
         try{
             return ResponseEntity.ok(bigliettoService.getAll(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -47,7 +47,7 @@ public class BigliettoController {
         try{
             return ResponseEntity.ok(bigliettoService.getByDate(date, pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("isAuthenticated()")
@@ -56,7 +56,7 @@ public class BigliettoController {
         try{
             return ResponseEntity.ok(bigliettoService.getByUserAndDate(authenticationToken, date, pageNumber, pageSize));
         }catch (Exception e ){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -65,7 +65,7 @@ public class BigliettoController {
         try{
             return ResponseEntity.ok(bigliettoService.getByUserAndDate(uesrId, date, pageNumber, pageSize));
         }catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -74,7 +74,7 @@ public class BigliettoController {
         try{
             return ResponseEntity.ok(bigliettoService.getByUser(userId,pageNumber,pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -88,7 +88,7 @@ public class BigliettoController {
         try{
             return ResponseEntity.ok(bigliettoService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

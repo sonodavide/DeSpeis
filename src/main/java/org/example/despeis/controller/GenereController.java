@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.GenereDto;
 import org.example.despeis.services.GenereService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,11 @@ public class GenereController {
     public ResponseEntity<?> nuovo(@RequestBody GenereDto genereDto){
         try{
             return ResponseEntity.ok(genereService.nuovo(genereDto));
-        }catch (Exception e){
+        }catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -32,7 +36,7 @@ public class GenereController {
             genereService.delete(genereDto);
             return ResponseEntity.ok("ok");
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -41,7 +45,7 @@ public class GenereController {
         try{
             return ResponseEntity.ok(genereService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -51,7 +55,7 @@ public class GenereController {
         try{
             return ResponseEntity.ok(genereService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -60,7 +64,7 @@ public class GenereController {
         try{
             return ResponseEntity.ok(genereService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @GetMapping("/getNomeById")
@@ -68,7 +72,7 @@ public class GenereController {
         try{
             return ResponseEntity.ok(genereService.getNomeById(id));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
