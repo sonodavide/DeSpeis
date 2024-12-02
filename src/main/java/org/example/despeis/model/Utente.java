@@ -1,11 +1,9 @@
 package org.example.despeis.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -20,12 +18,17 @@ public class Utente {
     private String username;
 
     @Column(name = "firstname", nullable = false, length = Integer.MAX_VALUE)
-    private String firstname;
+    private String firstName;
 
     @Column(name = "lastname", nullable = false, length = Integer.MAX_VALUE)
-    private String lastname;
+    private String lastName;
 
     @Column(name = "email", nullable = false, length = Integer.MAX_VALUE)
     private String email;
+
+    @ColumnDefault("0")
+    @Column(name = "version")
+    @Version
+    private Integer version;
 
 }

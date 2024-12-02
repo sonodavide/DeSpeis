@@ -17,13 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 
@@ -70,7 +70,7 @@ public class SpettacoloService {
     @Transactional(readOnly = true)
     public List<SpettacoloDto> getAllAcquistabili(){
         ArrayList<SpettacoloDto> r = new ArrayList<>();
-        for(Spettacolo s :this.spettacoloRepository.findByAcquistabile(true)){
+        for(Spettacolo s :this.spettacoloRepository.findSpettacoliAcquistabili()){
             r.add(spettacoloMapper.toDto(s));
         }
         return r;
@@ -128,90 +128,96 @@ public class SpettacoloService {
 
 
     @Transactional
-    public Spettacolo aggiungiSpettacolo(NuovoSpettacoloDto nuovoSpettacolo) throws Exception {
-        //mettere che si può cambiare il prezzo del biglietto anche se ci sta gente prenotata
+    public SpettacoloDto aggiungiSpettacolo(NuovoSpettacoloDto nuovoSpettacolo) throws Exception {
+        List<Postispettacolo> postiEsistenti;
+        List<Integer> spettacoliProblematici;
+        List<Posti> posti;
+        if(nuovoSpettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
         if(nuovoSpettacolo.getPrezzo().compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException();
         Spettacolo s;
             if (nuovoSpettacolo.getId() == null) {
                 s = new Spettacolo();
-
             } else {
-                s = spettacoloRepository.findById(nuovoSpettacolo.getId()).orElseThrow(() -> new BadRequestException());
+                s = entityManager.find(Spettacolo.class, nuovoSpettacolo.getId(), LockModeType.OPTIMISTIC);
+                if(s==null) throw new BadRequestException();
 
-                if (!postispettacoloRepository.findBySpettacoloIdAndStato(s.getId(), "prenotato").isEmpty())
-                    throw new IllegalStateException("impossibile effettuare modifiche. Ci sta gente prenotata");
+                postiEsistenti = postispettacoloRepository.findBySpettacoloId(s.getId());
+                for(Postispettacolo p : postiEsistenti)
+                    if(p.getStato().equals("prenotato")) throw new IllegalStateException("impossibile effettuare modifiche. Ci sta gente prenotata");
+
+
+
             }
             s.setAcquistabile(nuovoSpettacolo.getAcquistabile());
             s.setPrezzo(nuovoSpettacolo.getPrezzo());
 
-            if(nuovoSpettacolo.getFilm()!=null){
+
                 
-                Film nuovoFilm = entityManager.find(Film.class, nuovoSpettacolo.getFilm().getId(), LockModeType.PESSIMISTIC_READ);
-                //Film nuovoFilm = filmRepository.findById(nuovoSpettacolo.getFilm().getId()).orElseThrow(() -> new BadRequestException());
-                if(s.getFilm()==null || !s.getFilm().equals(nuovoFilm)){
-                    Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
-                    LocalDateTime inizio = LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra());
-                    LocalDateTime fine = inizio.plus(durata);
-                    s.setData(nuovoSpettacolo.getData());
-                    s.setOra(nuovoSpettacolo.getOra());
-                    s.setDataFine(inizio.toLocalDate());
-                    s.setOraFine(fine.toLocalTime());
-                    List<Integer> spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(nuovoSpettacolo.getSala().getId(),
-                            nuovoSpettacolo.getData(),
-                            nuovoSpettacolo.getOra(),
-                            fine.toLocalDate(),
-                            fine.toLocalTime());
-                    if(!spettacoliProblematici.isEmpty()){
-                        System.out.println("sala occupata a quell'ora");
-                        throw new BadRequestException("La sala è occupata in quell'orario.");
-                    }
-                    s.setFilm(nuovoFilm);
+            Film nuovoFilm = entityManager.find(Film.class, nuovoSpettacolo.getFilm().getId(), LockModeType.OPTIMISTIC);
+            if(nuovoFilm==null) throw new BadRequestException();
+            if(s.getFilm()==null || !s.getFilm().equals(nuovoFilm)){
+                Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
+                LocalDateTime inizio = LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra());
+                LocalDateTime fine = inizio.plus(durata);
+
+                spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(
+                        nuovoSpettacolo.getSala().getId(),
+                        nuovoSpettacolo.getData(),
+                        nuovoSpettacolo.getOra(),
+                        fine.toLocalDate(),
+                        fine.toLocalTime());
+                if(!spettacoliProblematici.isEmpty()){
+                    System.out.println("sala occupata a quell'ora");
+                    throw new BadRequestException("La sala è occupata in quell'orario.");
                 }
+                s.setData(nuovoSpettacolo.getData());
+                s.setOra(nuovoSpettacolo.getOra());
+                s.setDataFine(inizio.toLocalDate());
+                s.setOraFine(fine.toLocalTime());
+                s.setFilm(nuovoFilm);
             }
+
 
         List<Postispettacolo> psList = new ArrayList<>();
-            if(nuovoSpettacolo.getSala()!=null){
 
-                Sala nuovaSala = salaRepository.findById(nuovoSpettacolo.getSala().getId()).orElseThrow(() -> new BadRequestException());
-                if( s.getSala() == null || !s.getSala().equals(nuovaSala)) {
-                    if(s.getId()!=null){
-                        postispettacoloRepository.deleteBySpettacoloId(s.getId());
-                    }
-                    s.setSala(nuovaSala);
-                    List<Posti> posti = postiRepository.findAllBySala(nuovaSala);
-                    if(posti.isEmpty()) throw new BadRequestException();
-                    for (Posti p : posti) {
-                        for(int i=1;i<=p.getSedili();i++){
-                            Postispettacolo ps = new Postispettacolo();
-                            ps.setStato("libero");
-                            ps.setSedile(i);
-                            ps.setFila(p.getFila());
-                            ps.setSpettacolo(s);
-                            psList.add(ps);
-
-                        }
-                    }
-
+        //Optimistic lock da mettere alla sala
+        Sala nuovaSala = entityManager.find(Sala.class, nuovoSpettacolo.getSala().getId(), LockModeType.OPTIMISTIC);
+        if(nuovaSala==null) throw new BadRequestException();
+        if( s.getSala() == null || !s.getSala().equals(nuovaSala)) {
+            if(s.getId()!=null){
+                postispettacoloRepository.deleteBySpettacoloId(s.getId());
+            }
+            s.setSala(nuovaSala);
+            posti = postiRepository.findAllBySala(nuovaSala);
+            if(posti.isEmpty()) throw new BadRequestException();
+            for (Posti p : posti) {
+                for(int i=1;i<=p.getSedili();i++){
+                    Postispettacolo ps = new Postispettacolo();
+                    ps.setStato("libero");
+                    ps.setSedile(i);
+                    ps.setFila(p.getFila());
+                    ps.setSpettacolo(s);
+                    psList.add(ps);
                 }
             }
+        }
 
 
 
-            s.setData(nuovoSpettacolo.getData());
-            s.setOra(nuovoSpettacolo.getOra());
+
 
 
             Spettacolo ret = spettacoloRepository.save(s);
             if (!psList.isEmpty())
                 postispettacoloRepository.saveAll(psList);
-            return ret;
+            return spettacoloMapper.toDto(ret);
 
 
     }
 
     @Transactional
     public SpettacoloDto elimina(SpettacoloDto spettacolo){
-        spettacoloRepository.delete(spettacoloMapper.toEntity(spettacolo));
+        spettacoloRepository.deleteById(spettacolo.getId());
         return spettacolo;
     }
 
@@ -236,5 +242,17 @@ public class SpettacoloService {
     @Transactional(readOnly = true)
     public Long count(){
         return spettacoloRepository.count();
+    }
+    @Transactional(readOnly = true)
+    public SpettacoloDto getById(Integer id){
+        return spettacoloMapper.toDto(spettacoloRepository.findById(id).orElseThrow(() -> new NoSuchElementException()));
+    }
+
+    @Transactional(readOnly = true)
+    public SpettacoloDto getByIdAcquistabile(Integer id){
+        Spettacolo spettacolo = spettacoloRepository.findSpettacoloAcquistabileById(id);
+        if(spettacolo==null) throw new NoSuchElementException();
+        return spettacoloMapper.toDto(spettacolo);
+
     }
 }

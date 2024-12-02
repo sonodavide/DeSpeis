@@ -34,6 +34,7 @@ public class SalaController {
             return ResponseEntity.badRequest().build();
         }
         catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -44,6 +45,7 @@ public class SalaController {
         try{
             return ResponseEntity.ok(salaService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -55,6 +57,7 @@ public class SalaController {
         }catch (NoSuchElementException e){
             return ResponseEntity.notFound().build();
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -70,6 +73,7 @@ public class SalaController {
         try{
             return ResponseEntity.ok(salaService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

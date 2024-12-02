@@ -24,6 +24,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.getAll());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -33,6 +34,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -54,6 +56,7 @@ public class AttoreController {
             return ResponseEntity.badRequest().build();
         }
         catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -64,6 +67,7 @@ public class AttoreController {
             attoreService.delete(attoreDto);
             return ResponseEntity.ok().build();
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -73,6 +77,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -82,6 +87,7 @@ public class AttoreController {
         try{
             return ResponseEntity.ok(attoreService.getNomeById(id));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

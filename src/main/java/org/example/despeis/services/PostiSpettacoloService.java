@@ -1,10 +1,10 @@
 package org.example.despeis.services;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.PostiSpettacoloResponseDto;
+import org.example.despeis.dto.PostispettacoloDto;
 import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.mapper.PostispettacoloMapper;
 import org.example.despeis.model.*;
@@ -15,11 +15,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class PostiSpettacoloService {
@@ -63,56 +61,63 @@ public class PostiSpettacoloService {
 
     @Transactional
     public PostiSpettacoloResponseDto blocca(PrenotazioneRequestDto prenotazioneRequestDto) throws BadRequestException{
-        if(prenotazioneRequestDto.getPostiIds().size()==0){
+        if(prenotazioneRequestDto.getPosti().size()==0){
             throw new BadRequestException("dati non validi");
         }
-        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndNotPrenotati(prenotazioneRequestDto.getPostiIds());
+        Set<Integer> postiIds = new HashSet<>();
+        for(PostispettacoloDto p : prenotazioneRequestDto.getPosti()){
+            postiIds.add(p.getId());
+        }
+        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndNotPrenotati(postiIds);
 
-        if(p.size()!=prenotazioneRequestDto.getPostiIds().size()) throw new BadRequestException("dati non validi");
+        if(p.size()!=prenotazioneRequestDto.getPosti().size()) throw new BadRequestException("dati non validi");
         for(Postispettacolo posto : p){
-            if(posto.getStato().equals("bloccato")){
-                posto.setStato("libero");
-            } else {
-                posto.setStato("bloccato");
-            }
+            if(posto.getStato().equals("bloccato")) posto.setStato("libero");
+            else if(posto.getStato().equals("libero")) posto.setStato("bloccato");
+
+
         }
         postiSpettacoloRepository.saveAll(p);
         return getBySpettacoloId(p.get(0).getSpettacolo().getId());
     }
     @Transactional
     public boolean prenota(JwtAuthenticationToken authenticationToken, PrenotazioneRequestDto prenotazione) throws Exception{
-        try{
+
         String userId = Utils.getUserId(authenticationToken);
-        Spettacolo spettacolo =entityManager.find(Spettacolo.class, prenotazione.getSpettacoloId(), LockModeType.PESSIMISTIC_READ);
+        Spettacolo spettacolo = spettacoloRepository.findSpettacoloAcquistabileById(prenotazione.getSpettacoloId());
         if(spettacolo == null || !spettacolo.getAcquistabile()) throw new BadRequestException();
-        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(prenotazione.getPostiIds());
-        if(p.size()!=prenotazione.getPostiIds().size()) {
+        if(!(spettacolo.getPrezzo().multiply(new BigDecimal(prenotazione.getPosti().size()))).equals(prenotazione.getPrezzo())) throw new BadRequestException();
+
+        Set<Integer> postiIds = new HashSet<>();
+        for(PostispettacoloDto p : prenotazione.getPosti()){
+            postiIds.add(p.getId());
+        }
+        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(postiIds);
+        if(p.size()!=prenotazione.getPosti().size()) {
             throw new IllegalStateException("posto/i già prenotati");
         }
-            ArrayList<Biglietto> biglietti = new ArrayList<>();
-            Ordine ordine = new Ordine();
-            ordine.setData(LocalDate.now());
-            ordine.setStato("confermato");
-            Utente utente = utenteRepository.findById(userId).orElseThrow(() -> new BadRequestException("utente non valido"));
+        for(Postispettacolo posto : p) if(!posto.getSpettacolo().equals(spettacolo)) throw new BadRequestException();
+        ArrayList<Biglietto> biglietti = new ArrayList<>();
+        Ordine ordine = new Ordine();
+        ordine.setData(LocalDate.now());
+        ordine.setStato("confermato");
+        Utente utente = utenteRepository.findById(userId).orElseThrow(() -> new BadRequestException("utente non valido"));
+        ordine.setUtente(utente);
 
-            ordine = ordineRepository.save(ordine);
-            for(Postispettacolo posto : p){
-                posto.setStato("prenotato");
-                Biglietto biglietto = new Biglietto();
-                biglietto.setPostospettacolo(posto);
-                biglietto.setUtente(utente);
-                biglietto.setOrdine(ordine);
-                biglietto.setPrezzo(spettacolo.getPrezzo());
-                biglietti.add(biglietto);
-            }
-
-            bigliettoRepository.saveAll(biglietti);
-            postiSpettacoloRepository.saveAll(p);
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
+        ordine = ordineRepository.save(ordine);
+        for(Postispettacolo posto : p){
+            posto.setStato("prenotato");
+            Biglietto biglietto = new Biglietto();
+            biglietto.setPostospettacolo(posto);
+            biglietto.setUtente(utente);
+            biglietto.setOrdine(ordine);
+            biglietto.setPrezzo(spettacolo.getPrezzo());
+            biglietti.add(biglietto);
         }
+
+        bigliettoRepository.saveAll(biglietti);
+        postiSpettacoloRepository.saveAll(p);
+        return true;
 
     }
 }

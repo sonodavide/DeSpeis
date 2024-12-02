@@ -34,7 +34,7 @@ public class RegistaService {
     }
     @Transactional
     public void delete(RegistaDto registaDto){
-        registaRepository.delete(registaMapper.toEntity(registaDto));
+        registaRepository.deleteById(registaDto.getId());
     }
     @Transactional
     public void delete(Integer registaId){

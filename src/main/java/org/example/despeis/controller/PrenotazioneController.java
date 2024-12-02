@@ -26,6 +26,7 @@ public class PrenotazioneController {
         try{
             return ResponseEntity.ok(postiSpettacoloService.prenota(authenticationToken, prenotazioneRequestDto));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -38,6 +39,7 @@ public class PrenotazioneController {
             return ResponseEntity.badRequest().build();
         }
         catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

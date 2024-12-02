@@ -50,6 +50,7 @@ public class FilmController {
             return ResponseEntity.badRequest().build();
         }
         catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -59,6 +60,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.elimina(film));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -78,6 +80,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -88,6 +91,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -97,6 +101,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.cercaTag(tag, id, pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

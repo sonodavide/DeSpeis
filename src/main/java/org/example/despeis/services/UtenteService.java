@@ -62,7 +62,7 @@ public class UtenteService {
 
     @Transactional(readOnly = true)
     public PaginatedResponse<UtenteDto> getAllPaginated(Integer pageNumber, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("cognome"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("lastName"));
         Page<Utente> result = utenteRepository.findAll(pageable);
 
         return new PaginatedResponse<>(
@@ -92,12 +92,12 @@ public class UtenteService {
 
     @Transactional
     public void update(JwtAuthenticationToken authenticationToken){
-        Utente utente = new Utente();
-        utente.setId(Utils.getUserId(authenticationToken));
+        Utente utente = utenteRepository.findById(Utils.getUserId(authenticationToken)).orElse(new Utente());
+        if(utente.getId()==null)utente.setId(Utils.getUserId(authenticationToken));
         utente.setUsername(Utils.getUsername(authenticationToken));
-        utente.setFirstname(Utils.getFirstName(authenticationToken));
+        utente.setFirstName(Utils.getFirstName(authenticationToken));
         utente.setEmail(Utils.getEmail(authenticationToken));
-        utente.setLastname(Utils.getLastName(authenticationToken));
+        utente.setLastName(Utils.getLastName(authenticationToken));
         utenteRepository.save(utente);
     }
 }
