@@ -75,7 +75,7 @@ public class AttoreService {
     }
 
     @Transactional(readOnly = true)
-    public String getNomeById(Integer id){
+    public String getNomeById(Integer id) throws NoSuchElementException{
         Attore attore = attoreRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         return attore.getNome() + " " + attore.getCognome();
     }

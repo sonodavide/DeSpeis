@@ -8,6 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
+
 @RestController
 @RequestMapping("/utente")
 public class UtenteController {
@@ -43,7 +45,10 @@ public class UtenteController {
     public ResponseEntity<?> getByUserId(String userId){
         try{
             return ResponseEntity.ok(utenteService.getById(userId));
-        }catch (Exception e){
+        }catch (NoSuchElementException e){
+            return ResponseEntity.notFound().build();
+        }
+        catch (Exception e){
             return ResponseEntity.internalServerError().build();
         }
     }

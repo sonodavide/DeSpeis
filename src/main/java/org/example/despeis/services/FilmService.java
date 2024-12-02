@@ -13,6 +13,7 @@ import org.example.despeis.mapper.RegistaMapper;
 import org.example.despeis.model.*;
 import org.example.despeis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -56,8 +57,8 @@ public class FilmService {
     }
 
     @Transactional(readOnly = true)
-    public FilmDto getById(int id) {
-        return filmMapper.toDto(filmRepository.findById(id).orElseThrow());
+    public FilmDto getById(int id) throws NoSuchElementException {
+        return filmMapper.toDto(filmRepository.findById(id).orElseThrow(() -> new NoSuchElementException()));
     }
     @Transactional(readOnly = true)
     public List<FilmDto> getAll() {
@@ -75,9 +76,9 @@ public class FilmService {
     }
     @Transactional
     public FilmDto nuovoFilm(FilmDto nuovoFilm) throws Exception {
-        //creo/modifico il film
         List<Spettacolo> spettacoliConStoFilm = new ArrayList<>();
 
+        //creo/modifico il film
         Film film;
         if(nuovoFilm.getId()==null){
             film = new Film();
@@ -87,7 +88,7 @@ public class FilmService {
             spettacoliConStoFilm = spettacoloRepository.findProssimiSpettacoliByFilm(film);
 
         }
-        System.out.println(spettacoliConStoFilm.toString());
+
         film.setDatauscita(nuovoFilm.getDatauscita());
         film.setTitolo(nuovoFilm.getTitolo());
         film.setDurata(nuovoFilm.getDurata());
@@ -109,7 +110,7 @@ public class FilmService {
                         spettacolo.getDataFine(),
                         spettacolo.getOraFine());
                 if(!spettacoliProblematici.isEmpty()){
-                    System.out.println("accavallamento");
+
                     throw new IllegalStateException("Accavallamento");
                 }
             }
@@ -198,5 +199,10 @@ public class FilmService {
         }
 
         return new PaginatedResponse<>(result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
+    }
+
+    @Transactional
+    public void elimina(int id){
+        filmRepository.deleteById(id);
     }
 }

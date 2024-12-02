@@ -1,5 +1,6 @@
 package org.example.despeis.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,5 +46,16 @@ public class Film {
 
     @Column(name = "datauscita")
     private LocalDate datauscita;
+
+    @OneToMany(mappedBy = "film", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private Set<Attorefilm> attorefilms = new LinkedHashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "film", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private Set<Regiafilm> regiafilms = new LinkedHashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "film", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private Set<Generefilm> generefilms = new LinkedHashSet<>();
 
 }

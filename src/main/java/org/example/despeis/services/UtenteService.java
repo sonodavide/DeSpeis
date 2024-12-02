@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,8 +33,9 @@ public class UtenteService {
     }
 
     @Transactional(readOnly = true)
-    public UtenteDto getById(String id) {
-        return utenteMapper.toDto(utenteRepository.findById(id).orElseThrow());
+    public UtenteDto getById(String id) throws NoSuchElementException {
+        UtenteDto utenteDto = utenteMapper.toDto(utenteRepository.findById(id).orElseThrow(() -> new NoSuchElementException()));
+        return utenteDto;
     }
 
     @Transactional(readOnly = true)

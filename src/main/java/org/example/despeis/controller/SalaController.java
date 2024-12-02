@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/sala")
@@ -49,7 +50,13 @@ public class SalaController {
 
     @GetMapping("/postiPerFila")
     public ResponseEntity<?> getPostiPerFila(@RequestParam Integer salaId){
-        return ResponseEntity.ok(salaService.getSalaConPostiPerFila(salaId));
+        try {
+            return ResponseEntity.ok(salaService.getSalaConPostiPerFila(salaId));
+        }catch (NoSuchElementException e){
+            return ResponseEntity.notFound().build();
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
