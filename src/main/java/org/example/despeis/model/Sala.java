@@ -19,7 +19,7 @@ public class Sala {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @OneToMany(mappedBy = "sala")
+    @OneToMany(mappedBy = "sala", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<Posti> postis = new LinkedHashSet<>();
 
     @ColumnDefault("0")

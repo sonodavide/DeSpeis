@@ -4,8 +4,7 @@ import org.example.despeis.dto.SalaConPostiDto;
 import org.example.despeis.model.Sala;
 import org.mapstruct.*;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
-public interface SalaConPostiMapper {
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)public interface SalaConPostiMapper {
     Sala toEntity(SalaConPostiDto salaConPostiDto);
 
     @AfterMapping
@@ -15,6 +14,5 @@ public interface SalaConPostiMapper {
 
     SalaConPostiDto toDto(Sala sala);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Sala partialUpdate(SalaConPostiDto salaConPostiDto, @MappingTarget Sala sala);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)Sala partialUpdate(SalaConPostiDto salaConPostiDto, @MappingTarget Sala sala);
 }

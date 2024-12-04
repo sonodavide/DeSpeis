@@ -188,7 +188,7 @@ public class SpettacoloService {
                 postispettacoloRepository.deleteBySpettacoloId(s.getId());
             }
             s.setSala(nuovaSala);
-            posti = postiRepository.findAllBySala(nuovaSala);
+            posti = postiRepository.findAllBySalaOrderByFilaAsc(nuovaSala);
             if(posti.isEmpty()) throw new BadRequestException();
             for (Posti p : posti) {
                 for(int i=1;i<=p.getSedili();i++){
@@ -222,22 +222,7 @@ public class SpettacoloService {
     }
 
 
-    @Transactional(readOnly = true)
-    public PostiSpettacoloResponseDto getPostiSpettacoloBySpettacoloId(int spettacoloId){
-        List<Postispettacolo> postiSpettacolo = postispettacoloRepository.findAllBySpettacoloIdOrderByFilaAscSedileAsc(spettacoloId);
-        HashMap<String, List<PostiSpettacoloResponseDto.PostoResponse>> tempMap = new HashMap<>();
-        for(Postispettacolo posto : postiSpettacolo){
-            String filaCorrente = posto.getFila();
-            if(!tempMap.containsKey(filaCorrente)){
-                tempMap.put(filaCorrente, new ArrayList<>());
-            }
-            tempMap.get(filaCorrente).add(
-                    new PostiSpettacoloResponseDto.PostoResponse(
-                            posto.getId(), posto.getSedile(), posto.getStato()
-                    ));
-        }
-        return new PostiSpettacoloResponseDto(spettacoloId, tempMap);
-    }
+
 
     @Transactional(readOnly = true)
     public Long count(){
@@ -254,5 +239,11 @@ public class SpettacoloService {
         if(spettacolo==null) throw new NoSuchElementException();
         return spettacoloMapper.toDto(spettacolo);
 
+    }
+    @Transactional(readOnly = true)
+    public SpettacoloSenzaFilmDto getSenzaFilmAcquistabileById(int id) throws Exception {
+        Spettacolo spettacolo = spettacoloRepository.findSpettacoloAcquistabileById(id);
+        if(spettacolo==null) throw new Exception();
+        return spettacoloSenzaFilmMapper.toDto(spettacolo);
     }
 }
