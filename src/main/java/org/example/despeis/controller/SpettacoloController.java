@@ -147,6 +147,15 @@ e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/getSenzaFilmById")
+    public ResponseEntity<?> getSenzaFilmById(@RequestParam int id){
+        try{
+            return ResponseEntity.ok(spettacoloService.getSenzaFilmById(id));
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
 
 }
