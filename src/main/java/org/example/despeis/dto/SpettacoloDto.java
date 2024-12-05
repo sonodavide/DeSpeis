@@ -1,5 +1,6 @@
 package org.example.despeis.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -13,11 +14,18 @@ import java.time.LocalTime;
 @Value
 public class SpettacoloDto implements Serializable {
     Integer id;
+    @NotNull
     LocalDate data;
+    @NotNull
     LocalTime ora;
+    @NotNull
     BigDecimal prezzo;
+    @NotNull
     Integer salaId;
+    @NotNull
     FilmDto film;
+    @NotNull
     LocalDate dataFine;
+    @NotNull
     LocalTime oraFine;
 }

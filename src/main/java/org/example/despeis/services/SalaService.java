@@ -1,5 +1,7 @@
 package org.example.despeis.services;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.*;
 import org.example.despeis.dto.SalaDto;
@@ -27,7 +29,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class SalaService {
-
+    @PersistenceContext
+    private EntityManager entityManager;
     private final SalaRepository salaRepository;
     private final SalaMapper salaMapper;
     private final PostiRepository postiRepository;
@@ -43,15 +46,20 @@ public class SalaService {
         this.postiMapper = postiMapper;
         this.salaConPostiMapper = salaConPostiMapper;
         this.spettacoloRepository = spettacoloRepository;
+
     }
 
     @Transactional
-    public boolean delete(SalaDto salaDto){
+    public boolean delete(SalaDto salaDto) throws BadRequestException {
         return delete(salaDto.getId());
 
     }
     @Transactional
-    public boolean delete(Integer salaId){
+    public boolean delete(Integer salaId) throws BadRequestException {
+        Sala s = entityManager.find(Sala.class, salaId);
+        if(s == null) throw new BadRequestException();
+        if(spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(s)!=null) throw new IllegalStateException();
+        entityManager.createQuery("UPDATE Spettacolo s SET s.sala = null WHERE s.sala.id = :salaId").setParameter("salaId", salaId).executeUpdate();
         salaRepository.deleteById(salaId);
         return true;
     }
@@ -67,7 +75,7 @@ public class SalaService {
                 controllo se ci sono spettacoli acquistabili con questa sala. In caso,
                 ne impedisco la modifica.
                 */
-                if(spettacoloRepository.findFirstBySalaAndAcquistabileTrueAndNonPassati(nuovaSala)!=null) throw new BadRequestException();
+                if(spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(nuovaSala)!=null) throw new BadRequestException();
                 postiRepository.deleteBySalaId(nuovaSala.getId());
                 postiRepository.flush();
 

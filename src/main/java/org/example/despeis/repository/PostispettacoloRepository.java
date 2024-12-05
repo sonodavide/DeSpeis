@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Set;
 
 public interface PostispettacoloRepository extends JpaRepository<Postispettacolo, Integer> {
-    public List<Postispettacolo> findAllBySpettacoloIdOrderByFilaAscSedileAsc(int spettacolo);
+    @Query("SELECT s FROM Spettacolo s, Postispettacolo p WHERE s.id = :spettacoloId and s.acquistabile=true and s.data>=current_date and s.acquistabile = true and p.spettacolo.id = s.id ORDER BY p.fila ASC, p.sedile ASC ")
+    public List<Postispettacolo> findAllBySpettacoloIdOrderByFilaAscSedileAscAcquistabile(@Param("spettacoloId")int spettacolo);
 
+    public List<Postispettacolo> findAllBySpettacoloIdOrderByFilaAscSedileAsc(int spettacolo);
     @Lock(LockModeType.OPTIMISTIC)
     public List<Postispettacolo> findBySpettacoloId(int spettacoloId);
     public List<Postispettacolo> deleteBySpettacoloId(int spettacoloId);

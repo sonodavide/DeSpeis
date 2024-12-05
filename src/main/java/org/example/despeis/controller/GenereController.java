@@ -6,6 +6,7 @@ import org.example.despeis.services.GenereService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +20,7 @@ public class GenereController {
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody GenereDto genereDto){
+    public ResponseEntity<?> nuovo(@Validated @RequestBody GenereDto genereDto){
         try{
             return ResponseEntity.ok(genereService.nuovo(genereDto));
         }catch (BadRequestException e){
@@ -32,7 +33,7 @@ e.printStackTrace();
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
-    public ResponseEntity<?> elimina(@RequestBody GenereDto genereDto){
+    public ResponseEntity<?> elimina(@Validated @RequestBody GenereDto genereDto){
         try{
             genereService.delete(genereDto);
             return ResponseEntity.ok("ok");

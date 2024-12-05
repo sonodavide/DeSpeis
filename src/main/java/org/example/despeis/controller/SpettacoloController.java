@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -42,7 +42,7 @@ public class SpettacoloController {
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody NuovoSpettacoloDto nuovo){
+    public ResponseEntity<?> nuovo(@Validated @RequestBody NuovoSpettacoloDto nuovo){
 
         try{
             return ResponseEntity.ok(spettacoloService.aggiungiSpettacolo(nuovo));
@@ -58,7 +58,7 @@ public class SpettacoloController {
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("elimina")
-    public ResponseEntity<?> elimina(@RequestBody SpettacoloDto spettacolo){
+    public ResponseEntity<?> elimina(@Validated @RequestBody SpettacoloDto spettacolo){
         try{
             return ResponseEntity.ok(spettacoloService.elimina(spettacolo));
         }catch (Exception e){
@@ -67,15 +67,26 @@ e.printStackTrace();
         }
     }
 
-    @GetMapping("/postiSpettacolo")
-    public ResponseEntity<?> getPostiSpettacolo(@RequestParam("spettacoloId") Integer spettacoloId){
+    @GetMapping("/postiSpettacoloAcquistabile")
+    public ResponseEntity<?> getPostiSpettacoloAcquistabile(@RequestParam("spettacoloId") Integer spettacoloId){
         try{
-            return ResponseEntity.ok(postiSpettacoloService.getBySpettacoloId(spettacoloId));
+            return ResponseEntity.ok(postiSpettacoloService.getAcquistabileBySpettacoloId(spettacoloId));
         }catch (Exception e){
 e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/postiSpettacolo")
+    public ResponseEntity<?> getPostiSpettacolo(@RequestParam("spettacoloId") Integer spettacoloId){
+        try{
+            return ResponseEntity.ok(postiSpettacoloService.getBySpettacoloId(spettacoloId));
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PreAuthorize("hasRole('admin')")
     @GetMapping("/cerca")
     public ResponseEntity<?> cercaByDate(@RequestParam("date") String date, @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){

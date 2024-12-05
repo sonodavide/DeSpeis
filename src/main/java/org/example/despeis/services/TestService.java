@@ -18,7 +18,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -54,13 +56,6 @@ public class TestService {
     @Transactional
     public void casca() {
 
-
-
-        System.out.println(spettacoloRepository.findConflictingSpettacoli(4, LocalDate.of(2024, 10, 6), LocalTime.of(19, 30), LocalDate.of(2024, 10, 20), LocalTime.of(20, 9)).isEmpty());
-        System.out.println(spettacoloRepository.findConflictingSpettacoli(4, LocalDate.of(2024, 10, 6), LocalTime.of(19, 31), LocalDate.of(2024, 10, 20), LocalTime.of(20, 9)).isEmpty());
-        System.out.println(spettacoloRepository.findConflictingSpettacoli(4, LocalDate.of(2024, 10, 6), LocalTime.of(19, 29), LocalDate.of(2024, 10, 20), LocalTime.of(20, 7)).isEmpty());
-        System.out.println(spettacoloRepository.findConflictingSpettacoli(4, LocalDate.of(2024, 10, 6), LocalTime.of(19, 29), LocalDate.of(2024, 10, 20), LocalTime.of(20, 10)).isEmpty());
-        System.out.println(spettacoloRepository.findConflictingSpettacoli(4, LocalDate.of(2024, 10, 5), LocalTime.of(19, 30), LocalDate.of(2024, 10, 5), LocalTime.of(20, 9)).isEmpty());
 
 
     }

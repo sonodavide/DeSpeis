@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class SalaController {
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody SalaConPostiDto sala){
+    public ResponseEntity<?> nuovo(@Validated @RequestBody SalaConPostiDto sala){
         try{
             return ResponseEntity.ok(salaService.nuovo(sala));
         }
@@ -40,7 +41,7 @@ e.printStackTrace();
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<?> getAllPaged(@RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
+    public ResponseEntity<?> getAllPaged(@Validated @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
 
         try{
             return ResponseEntity.ok(salaService.getAllPaginated(pageNumber, pageSize));
@@ -51,7 +52,7 @@ e.printStackTrace();
     }
 
     @GetMapping("/postiPerFila")
-    public ResponseEntity<?> getPostiPerFila(@RequestParam Integer salaId){
+    public ResponseEntity<?> getPostiPerFila(@Validated @RequestParam Integer salaId){
         try {
             return ResponseEntity.ok(salaService.getSalaConPostiPerFila(salaId));
         }catch (NoSuchElementException e){
@@ -63,9 +64,15 @@ e.printStackTrace();
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
-    public ResponseEntity<?> elimina(@RequestBody SalaDto sala){
+    public ResponseEntity<?> elimina(@Validated @RequestBody SalaDto sala){
         System.out.println(sala.getId());
+        try{
+
         return ResponseEntity.ok(salaService.delete(sala));
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
     @PreAuthorize("hasRole('admin')")
     @GetMapping("/count")

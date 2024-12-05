@@ -7,6 +7,7 @@ import org.example.despeis.services.AttoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -49,7 +50,7 @@ e.printStackTrace();
 
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody AttoreDto attoreDto){
+    public ResponseEntity<?> nuovo(@Validated @RequestBody AttoreDto attoreDto){
         try{
             return ResponseEntity.ok(attoreService.nuovo(attoreDto));
         }catch (BadRequestException e){
@@ -62,7 +63,7 @@ e.printStackTrace();
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
-    public ResponseEntity<?> elimina(@RequestBody AttoreDto attoreDto){
+    public ResponseEntity<?> elimina(@Validated @RequestBody AttoreDto attoreDto){
         try{
             attoreService.delete(attoreDto);
             return ResponseEntity.ok().build();

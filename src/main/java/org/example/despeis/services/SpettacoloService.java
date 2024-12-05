@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +39,7 @@ public class SpettacoloService {
     private final SalaRepository salaRepository;
     private final PostispettacoloRepository postispettacoloRepository;
     private final PostiRepository postiRepository;
-    private final SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper;
+    private final SpettacoloSenzaFilmTagsMapper spettacoloSenzaFilmTagsMapper;
     private final FilmMapper filmMapper;
     private final NuovoSpettacoloMapper nuovoSpettacoloMapper;
     private final PostiMapper postiMapper;
@@ -45,36 +47,22 @@ public class SpettacoloService {
 
 
     @Autowired
-    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostispettacoloMapper postispettacoloMapper, SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper, FilmMapper filmMapper, NuovoSpettacoloMapper nuovoSpettacoloMapper, PostiMapper postiMapper, SalaMapper salaMapper, PostiRepository postiRepository) {
+    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostispettacoloMapper postispettacoloMapper, SpettacoloSenzaFilmTagsMapper spettacoloSenzaFilmTagsMapper, FilmMapper filmMapper, NuovoSpettacoloMapper nuovoSpettacoloMapper, PostiMapper postiMapper, SalaMapper salaMapper, PostiRepository postiRepository) {
         this.spettacoloRepository = spettacoloRepository;
         this.spettacoloMapper = spettacoloMapper;
         this.filmRepository = filmRepository;
         this.salaRepository = salaRepository;
         this.postispettacoloRepository = postispettacoloRepository;
         this.postiRepository = postiRepository;
-        this.spettacoloSenzaFilmMapper = spettacoloSenzaFilmMapper;
+        this.spettacoloSenzaFilmTagsMapper = spettacoloSenzaFilmTagsMapper;
         this.filmMapper = filmMapper;
         this.nuovoSpettacoloMapper =  nuovoSpettacoloMapper;
         this.postiMapper = postiMapper;
         this.salaMapper = salaMapper;
     }
 
-    @Transactional(readOnly = true)
-    public List<SpettacoloDto> getAll(){
-        ArrayList<SpettacoloDto> r = new ArrayList<>();
-        for(Spettacolo s :this.spettacoloRepository.findAll()){
-            r.add(spettacoloMapper.toDto(s));
-        }
-        return r;
-    }
-    @Transactional(readOnly = true)
-    public List<SpettacoloDto> getAllAcquistabili(){
-        ArrayList<SpettacoloDto> r = new ArrayList<>();
-        for(Spettacolo s :this.spettacoloRepository.findSpettacoliAcquistabili()){
-            r.add(spettacoloMapper.toDto(s));
-        }
-        return r;
-    }
+
+
 
     @Transactional(readOnly = true)
     public List<FilmSpettacoliDto> getFilmSpettacoloAcquistabileByDate(LocalDate date) throws Exception {
@@ -82,19 +70,19 @@ public class SpettacoloService {
             List<Spettacolo> spettacoli = spettacoloRepository.findAllByDataAndAcquistabileOrderByFilmTitoloAscOraAsc(date, true);
 
 
-            List<SpettacoloSenzaFilmDto> spettacoliSenzaFilmDto = spettacoli.stream()
-                    .map(spettacoloSenzaFilmMapper::toDto)
+            List<SpettacoloSenzaFilmTagsDto> spettacoliSenzaFilmDto = spettacoli.stream()
+                    .map(spettacoloSenzaFilmTagsMapper::toDto)
                     .collect(Collectors.toList());
 
-            HashMap<FilmDto, ArrayList<SpettacoloSenzaFilmDto>> tempMap = new HashMap<>();
+            HashMap<FilmDto, ArrayList<SpettacoloSenzaFilmTagsDto>> tempMap = new HashMap<>();
 
 
             for(Spettacolo s : spettacoli){
                 FilmDto curretFilm = filmMapper.toDto(s.getFilm());
                 if(!tempMap.containsKey(curretFilm)) {
-                    tempMap.put(filmMapper.toDto(s.getFilm()), new ArrayList<SpettacoloSenzaFilmDto>());
+                    tempMap.put(filmMapper.toDto(s.getFilm()), new ArrayList<SpettacoloSenzaFilmTagsDto>());
                 }
-                tempMap.get(curretFilm).add(spettacoloSenzaFilmMapper.toDto(s));
+                tempMap.get(curretFilm).add(spettacoloSenzaFilmTagsMapper.toDto(s));
             }
             return tempMap.entrySet().stream()
                     .map(entry -> new FilmSpettacoliDto(entry.getKey(), entry.getValue()))
@@ -109,7 +97,7 @@ public class SpettacoloService {
 
     @Transactional(readOnly = true)
     public PaginatedResponse<NuovoSpettacoloDto> cerca(LocalDate date, Integer pageNumber, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora").descending());
         Page<Spettacolo> result = spettacoloRepository.findAllByDataOrderByFilmTitoloAscOraAsc(date, pageable);
         return new PaginatedResponse<>(
                 result.getContent().stream().map(nuovoSpettacoloMapper::toDto).collect(Collectors.toList()),
@@ -118,7 +106,7 @@ public class SpettacoloService {
     }
     @Transactional(readOnly = true)
     public PaginatedResponse<NuovoSpettacoloDto> getAllPaginated(Integer pageNumber, Integer pageSize){
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora").descending());
         Page<Spettacolo> result = spettacoloRepository.findAll(pageable);
         return new PaginatedResponse<>(
                 result.getContent().stream().map(nuovoSpettacoloMapper::toDto).collect(Collectors.toList()),
@@ -132,7 +120,8 @@ public class SpettacoloService {
         List<Postispettacolo> postiEsistenti;
         List<Integer> spettacoliProblematici;
         List<Posti> posti;
-        if(nuovoSpettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
+        nuovoSpettacolo.setOra(nuovoSpettacolo.getOra().truncatedTo(ChronoUnit.MINUTES));
+        //if(nuovoSpettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
         if(nuovoSpettacolo.getPrezzo().compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException();
         Spettacolo s;
             if (nuovoSpettacolo.getId() == null) {
@@ -140,10 +129,9 @@ public class SpettacoloService {
             } else {
                 s = entityManager.find(Spettacolo.class, nuovoSpettacolo.getId(), LockModeType.OPTIMISTIC);
                 if(s==null) throw new BadRequestException();
+                if(s.getDataFine().isAfter(LocalDate.now()) && s.getOraFine().isAfter(LocalTime.now())) throw new IllegalStateException();
 
-                postiEsistenti = postispettacoloRepository.findBySpettacoloId(s.getId());
-                for(Postispettacolo p : postiEsistenti)
-                    if(p.getStato().equals("prenotato")) throw new IllegalStateException("impossibile effettuare modifiche. Ci sta gente prenotata");
+
 
 
 
@@ -168,10 +156,10 @@ public class SpettacoloService {
                         fine.toLocalTime());
                 if(!spettacoliProblematici.isEmpty()){
                     System.out.println("sala occupata a quell'ora");
-                    throw new BadRequestException("La sala è occupata in quell'orario.");
+                    throw new IllegalStateException("La sala è occupata in quell'orario.");
                 }
                 s.setData(nuovoSpettacolo.getData());
-                s.setOra(nuovoSpettacolo.getOra());
+                s.setOra(nuovoSpettacolo.getOra().truncatedTo(ChronoUnit.MINUTES));
                 s.setDataFine(inizio.toLocalDate());
                 s.setOraFine(fine.toLocalTime());
                 s.setFilm(nuovoFilm);
@@ -185,6 +173,10 @@ public class SpettacoloService {
         if(nuovaSala==null) throw new BadRequestException();
         if( s.getSala() == null || !s.getSala().equals(nuovaSala)) {
             if(s.getId()!=null){
+                //impedisco la modifica della sala nel caso in cui ci sono già posti prenotati
+                postiEsistenti = postispettacoloRepository.findBySpettacoloId(s.getId());
+                for(Postispettacolo p : postiEsistenti)
+                    if(p.getStato().equals("prenotato")) throw new IllegalStateException("impossibile effettuare modifiche. Ci sta gente prenotata");
                 postispettacoloRepository.deleteBySpettacoloId(s.getId());
             }
             s.setSala(nuovaSala);
@@ -241,16 +233,17 @@ public class SpettacoloService {
 
     }
     @Transactional(readOnly = true)
-    public SpettacoloSenzaFilmDto getSenzaFilmAcquistabileById(int id) throws Exception {
+    public SpettacoloSenzaFilmTagsDto getSenzaFilmAcquistabileById(int id) throws Exception {
         Spettacolo spettacolo = spettacoloRepository.findSpettacoloAcquistabileById(id);
         if(spettacolo==null) throw new Exception();
-        return spettacoloSenzaFilmMapper.toDto(spettacolo);
+        SpettacoloSenzaFilmTagsDto a = spettacoloSenzaFilmTagsMapper.toDto(spettacolo);
+        return a;
     }
 
     @Transactional(readOnly = true)
-    public SpettacoloSenzaFilmDto getSenzaFilmById(int id) throws Exception {
+    public SpettacoloSenzaFilmTagsDto getSenzaFilmById(int id) throws Exception {
         Spettacolo spettacolo = spettacoloRepository.findById(id).orElseThrow(() -> new Exception());
         if(spettacolo==null) throw new Exception();
-        return spettacoloSenzaFilmMapper.toDto(spettacolo);
+        return spettacoloSenzaFilmTagsMapper.toDto(spettacolo);
     }
 }

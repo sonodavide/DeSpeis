@@ -1,5 +1,6 @@
 package org.example.despeis.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -10,6 +11,8 @@ import java.io.Serializable;
 @Value
 public class PostiDto implements Serializable {
     Integer id;
+    @NotNull
     String fila;
+    @NotNull
     Integer sedili;
 }

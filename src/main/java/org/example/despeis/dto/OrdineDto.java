@@ -1,5 +1,6 @@
 package org.example.despeis.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -13,8 +14,12 @@ import java.util.Set;
 @Value
 public class OrdineDto implements Serializable {
     Integer id;
+    @NotNull
     LocalDate data;
+    @NotNull
     String stato;
+    @NotNull
     BigDecimal totale;
+    @NotNull
     Set<BigliettoDto> bigliettos;
 }
