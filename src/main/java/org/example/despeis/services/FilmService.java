@@ -77,6 +77,8 @@ public class FilmService {
     }
     @Transactional
     public FilmDto nuovoFilm(FilmDto nuovoFilm) throws Exception {
+        if(nuovoFilm.getTitolo().equals("")) throw new BadRequestException();
+        if(nuovoFilm.getDurata()<0) throw new BadRequestException();
         List<Spettacolo> spettacoliConStoFilm = new ArrayList<>();
         List<Integer> spettacoliProblematici;
         //creo/modifico il film
@@ -108,12 +110,14 @@ public class FilmService {
                     Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
                     LocalDateTime inizio = LocalDateTime.of(spettacolo.getData(), spettacolo.getOra());
                     LocalDateTime fine = inizio.plus(durata);
-
+                    spettacolo.setOraFine(fine.toLocalTime());
+                    spettacolo.setDataFine(fine.toLocalDate());
                     spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(spettacolo.getSala().getId(),
                             spettacolo.getData(),
                             spettacolo.getOra(),
                             fine.toLocalDate(),
-                            fine.toLocalTime());
+                            fine.toLocalTime(),
+                            spettacolo.getId());
                     if(!spettacoliProblematici.isEmpty()){
                         throw new IllegalStateException("Accavallamento");
                     }
@@ -174,7 +178,7 @@ public class FilmService {
     public FilmDto elimina(FilmDto film){
         Film f = entityManager.find(Film.class, film.getId());
         if(!spettacoloRepository.findProssimiSpettacoliByFilm(f).isEmpty()) throw new IllegalStateException();
-        entityManager.createQuery("UPDATE Spettacolo s SET s.film = null WHERE s.film = :film").setParameter("film", film).executeUpdate();
+        entityManager.createQuery("UPDATE Spettacolo s SET s.film = null WHERE s.film = :film").setParameter("film", f).executeUpdate();
         filmRepository.deleteById(film.getId());
         return film;
     }
@@ -226,5 +230,11 @@ public class FilmService {
     @Transactional(readOnly = true)
     public List<FilmDto> ultimeUscite() {
         return filmRepository.ultimeUscite().stream().map(filmMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public boolean esisteInUnoSpettacoloAcquistabile(int filmId) {
+        return !spettacoloRepository.findProssimiSpettacoliByFilm(entityManager.find(Film.class, filmId)).isEmpty();
+
     }
 }

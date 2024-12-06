@@ -141,6 +141,7 @@ public class PostiSpettacoloService {
         ordine.setStato("confermato");
         Utente utente = utenteRepository.findById(userId).orElseThrow(() -> new BadRequestException("utente non valido"));
         ordine.setUtente(utente);
+        ordine.setTotale(prenotazione.getPrezzo());
 
         ordine = ordineRepository.save(ordine);
         for(Postispettacolo posto : p){
