@@ -10,4 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AttorefilmRepository extends JpaRepository<Attorefilm, AttorefilmId> {
     void deleteByFilm(Film film);
+
+
 }

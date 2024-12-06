@@ -210,8 +210,11 @@ public class SpettacoloService {
     }
 
     @Transactional
-    public SpettacoloDto elimina(SpettacoloDto spettacolo){
+    public SpettacoloDto elimina(SpettacoloDto spettacolo) throws Exception {
         spettacoloRepository.deleteById(spettacolo.getId());
+        if(entityManager.find(Spettacolo.class, spettacolo.getId())!=null){
+            throw new Exception();
+        }
         return spettacolo;
     }
 

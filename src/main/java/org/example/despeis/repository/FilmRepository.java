@@ -25,4 +25,7 @@ public interface FilmRepository extends JpaRepository<Film, Integer> {
     Page<Film> findAllByAttoresId(Integer attoreId, Pageable pageable);
     @Query("SELECT f FROM Film f ORDER BY f.datauscita DESC LIMIT 8")
     List<Film> ultimeUscite();
+
+
+
 }
