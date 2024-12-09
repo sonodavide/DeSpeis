@@ -51,6 +51,7 @@ public class GenereService {
     @Transactional
     public GenereDto nuovo(GenereDto genereDto) throws BadRequestException {
         if(genereDto.getGenere().trim().equals("")) throw new BadRequestException();
+
         return genereMapper.toDto(genereRepository.save(genereMapper.toEntity(genereDto)));
     }
 

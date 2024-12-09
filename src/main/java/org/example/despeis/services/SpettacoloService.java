@@ -290,7 +290,7 @@ public class SpettacoloService {
         LocalDateTime fine = LocalDateTime.of(s.getDataFine(), s.getOraFine());
         LocalDateTime inizio = LocalDateTime.of(s.getData(), s.getOra());
     if(LocalDateTime.now().isAfter(fine)) return "finito";
-        if(LocalDateTime.now().isAfter(inizio)) return  "iniziato";
+        if(LocalDateTime.now().isAfter(inizio)) return  "in corso";
         return "non iniziato";
 
     }

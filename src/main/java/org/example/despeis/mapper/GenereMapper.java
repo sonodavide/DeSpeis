@@ -6,6 +6,7 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface GenereMapper {
+    @Mapping(target = "genere", expression = "java(genereDto.getGenere().trim())")
     Genere toEntity(GenereDto genereDto);
 
     GenereDto toDto(Genere genere);

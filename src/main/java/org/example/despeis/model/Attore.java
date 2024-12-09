@@ -31,9 +31,6 @@ public class Attore {
             inverseJoinColumns = @JoinColumn(name = "film"))
     private Set<Film> films = new LinkedHashSet<>();
 
-    @ColumnDefault("0")
-    @Column(name = "version")
-    @Version
-    private Integer version;
+
 
 }

@@ -6,6 +6,8 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface RegistaMapper {
+    @Mapping(target = "nome", expression = "java(registaDto.getNome().trim())")
+    @Mapping(target = "cognome", expression = "java(registaDto.getCognome().trim())")
     Regista toEntity(RegistaDto registaDto);
 
     RegistaDto toDto(Regista regista);
