@@ -9,10 +9,8 @@ import org.example.despeis.mapper.PostiMapper;
 
 import org.example.despeis.mapper.SalaConPostiMapper;
 import org.example.despeis.mapper.SalaMapper;
-import org.example.despeis.model.Film;
 import org.example.despeis.model.Posti;
 
-import org.example.despeis.model.Regista;
 import org.example.despeis.model.Sala;
 import org.example.despeis.repository.PostiRepository;
 
@@ -60,8 +58,7 @@ public class SalaService {
     public boolean delete(Integer salaId) throws Exception {
         Sala s = entityManager.find(Sala.class, salaId);
         if(s == null) throw new BadRequestException();
-        if(!spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(s).isEmpty()) throw new IllegalStateException();
-        entityManager.createQuery("UPDATE Spettacolo s SET s.sala = null WHERE s.sala.id = :salaId").setParameter("salaId", salaId).executeUpdate();
+        if(spettacoloRepository.existsSpettacoloBySalaId(s.getId())) throw new IllegalStateException();
         salaRepository.deleteById(salaId);
         if(entityManager.find(Sala.class, salaId)!=null){
             throw new Exception();
@@ -110,11 +107,7 @@ public class SalaService {
         return salaRepository.count();
     }
 
-    @Transactional(readOnly = true)
-    public boolean esisteInUnoSpettacoloAcquistabile(int salaId) {
-        return !spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(entityManager.find(Sala.class, salaId)).isEmpty();
 
-    }
 
 
     @Transactional
@@ -123,11 +116,11 @@ public class SalaService {
         Sala nuovaSala;
         if (salaDto.getId() == null) throw new BadRequestException();
 
-        nuovaSala = salaRepository.findById(salaDto.getId()).orElseThrow(() -> new IllegalStateException());
+        nuovaSala = salaRepository.findById(salaDto.getId()).orElseThrow(() -> new BadRequestException());
 
 
-        if (!spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(nuovaSala).isEmpty())
-            throw new BadRequestException();
+        if (!spettacoloRepository.findBySalaAndNonFiniti(nuovaSala).isEmpty()) throw new IllegalStateException();
+
         postiRepository.deleteBySalaId(nuovaSala.getId());
         postiRepository.flush();
 

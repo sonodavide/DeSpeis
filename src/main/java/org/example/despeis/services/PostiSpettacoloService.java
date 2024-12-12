@@ -122,6 +122,7 @@ public class PostiSpettacoloService {
         int numeroPostiPrenotati=calcolaPostiPrenotati(prenotazione.getPostiSpettacoloResponseDto());
         String userId = Utils.getUserId(authenticationToken);
         Spettacolo spettacolo = spettacoloRepository.findSpettacoloAcquistabileById(prenotazione.getPostiSpettacoloResponseDto().getSpettacoloSenzaFilmTagsDto().getId());
+        
         if(spettacolo == null || !spettacolo.getAcquistabile() || spettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
 
         if( spettacolo.getPrezzo().multiply(new BigDecimal(numeroPostiPrenotati)).compareTo(prenotazione.getPrezzo()) != 0) throw new BadRequestException();

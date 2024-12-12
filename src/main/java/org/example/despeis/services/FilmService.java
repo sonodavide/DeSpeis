@@ -14,6 +14,7 @@ import org.example.despeis.mapper.RegistaMapper;
 import org.example.despeis.model.*;
 import org.example.despeis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,6 +111,8 @@ public class FilmService {
             //controllo se si creano accavallamenti di spettacoli
             if(!spettacoliConStoFilm.isEmpty()){
                 for(Spettacolo spettacolo : spettacoliConStoFilm){
+                    //controllo se uno di questi spettacoli è iniziato. Se lo è, annullo la modifica
+                    if(LocalDateTime.of(spettacolo.getData(), spettacolo.getOra()).isBefore(LocalDateTime.now())) throw new IllegalStateException();
                     Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
                     LocalDateTime inizio = LocalDateTime.of(spettacolo.getData(), spettacolo.getOra());
                     LocalDateTime fine = inizio.plus(durata);
@@ -178,8 +183,10 @@ public class FilmService {
     @Transactional
     public FilmDto elimina(FilmDto film) throws Exception {
         Film f = entityManager.find(Film.class, film.getId());
-        if(!spettacoloRepository.findProssimiSpettacoliByFilm(f).isEmpty()) throw new IllegalStateException();
-        entityManager.createQuery("UPDATE Spettacolo s SET s.film = null WHERE s.film = :film").setParameter("film", f).executeUpdate();
+        if(f==null) throw new BadRequestException();
+
+        if(spettacoloRepository.existsSpettacoloByFilmId(f.getId())) throw new IllegalStateException();
+
         filmRepository.deleteById(film.getId());
         if(entityManager.find(Film.class, film.getId())!=null){
             throw new Exception();
@@ -241,4 +248,6 @@ public class FilmService {
         return !spettacoloRepository.findProssimiSpettacoliByFilm(entityManager.find(Film.class, filmId)).isEmpty();
 
     }
+
+
 }

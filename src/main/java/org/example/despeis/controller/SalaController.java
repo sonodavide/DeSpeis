@@ -86,9 +86,11 @@ e.printStackTrace();
     public ResponseEntity<?> elimina(@Validated @RequestBody SalaDto sala){
         System.out.println(sala.getId());
         try{
-
-        return ResponseEntity.ok(salaService.delete(sala));
-        }catch (Exception e){
+            return ResponseEntity.ok(salaService.delete(sala));
+        }catch (IllegalStateException e){
+            return ResponseEntity.status(409).build();
+        }
+        catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
@@ -104,13 +106,5 @@ e.printStackTrace();
         }
     }
 
-    @PreAuthorize("hasRole('admin')")
-    @GetMapping("esisteInUnoSpettacoloDaProiettare")
-    public ResponseEntity<?> esisteInUnoSpettacoloDaProiettare(@RequestParam("id") int id){
-        try{
-            return ResponseEntity.ok(salaService.esisteInUnoSpettacoloAcquistabile(id));
-        }catch (Exception e){
-            return ResponseEntity.badRequest().build();
-        }
-    }
+
 }

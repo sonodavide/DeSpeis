@@ -4,6 +4,7 @@ import org.example.despeis.security.Utils;
 import org.example.despeis.services.FilmService;
 import org.example.despeis.services.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/test")
@@ -56,6 +60,19 @@ public class TestController {
             return ResponseEntity.ok("no");
 
         }
+    }
+
+    @GetMapping("testOverlap")
+    public void checkOverlap(
+            @RequestParam Integer salaId,
+            @RequestParam(required = false) Integer spettacoloId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInizio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime oraInizio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFine,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime oraFine
+    ) {
+        testService.testOverlap(salaId, spettacoloId, dataInizio, oraInizio, dataFine, oraFine);
+
     }
 
 }
