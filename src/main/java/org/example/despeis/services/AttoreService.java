@@ -1,6 +1,7 @@
 package org.example.despeis.services;
 
 import org.example.despeis.dto.AttoreDto;
+import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.AttoreMapper;
 import org.example.despeis.model.Attore;
 import org.example.despeis.repository.AttoreRepository;
@@ -26,6 +27,20 @@ public class AttoreService {
         this.attoreMapper=attoreMapper;
         this.attoreRepository=attoreRepository;
     }
+
+    @Transactional
+    public List<AttoreDto> getAll(){
+        return attoreRepository.findAll().stream().map(attoreMapper::toDto).collect(Collectors.toList());
+    }
+    @Transactional(readOnly = true)
+    public PaginatedResponse<AttoreDto> getAllPaginated(Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("cognome"));
+        Page<Attore> result = attoreRepository.findAll(pageable);
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(attoreMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements());
+
+    }
     @Transactional
     public void delete(AttoreDto attoreDto){
         attoreRepository.delete(attoreMapper.toEntity(attoreDto));
@@ -40,11 +55,14 @@ public class AttoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<AttoreDto> ricerca(String query){
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("cognome"));
+    public PaginatedResponse<AttoreDto> ricerca(String query, Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("cognome"));
         String searchTerm = "%" + query.toLowerCase() + "%";
         Page<Attore> result = attoreRepository.cerca(searchTerm, pageable);
 
-        return result.getContent().stream().map(attoreMapper::toDto).collect(Collectors.toList());
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(attoreMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements()
+        );
     }
 }

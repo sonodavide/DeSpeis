@@ -2,6 +2,7 @@ package org.example.despeis.services;
 
 import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.dto.GenereDto;
+import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.GenereMapper;
 import org.example.despeis.model.Attore;
 import org.example.despeis.model.Genere;
@@ -41,17 +42,32 @@ public class GenereService {
     }
 
     @Transactional(readOnly = true)
-    public List<GenereDto> ricerca(String query){
+    public PaginatedResponse<GenereDto> ricerca(String query, Integer pageNumber, Integer pageSize){
         try{
         Pageable pageable = PageRequest.of(0, 10, Sort.by("genere"));
         String searchTerm = "%" + query.toLowerCase() + "%";
         Page<Genere> result = genereRepository.cerca(searchTerm, pageable);
 
-        return result.getContent().stream().map(genereMapper::toDto).collect(Collectors.toList());
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(genereMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(),
+                result.getTotalElements()
+
+        );
 
         }catch (Exception e){
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<GenereDto> getAllPaginated(Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("genere"));
+        Page<Genere> result = genereRepository.findAll(pageable);
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(genereMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements());
+
     }
 }

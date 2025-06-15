@@ -27,10 +27,19 @@ public class UtenteController {
 
     }
 
-    @GetMapping("/cerca")
-    public ResponseEntity<?> cerca(@RequestParam String query) {
+    @GetMapping("/paged")
+    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+
         try{
-            return ResponseEntity.ok(utenteService.ricerca(query));
+            return ResponseEntity.ok(utenteService.getAllPaginated(pageNumber, pageSize));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/cerca")
+    public ResponseEntity<?> ricerca(@RequestParam String query, Integer pageNumber, Integer pageSize) {
+        try{
+            return ResponseEntity.ok(utenteService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

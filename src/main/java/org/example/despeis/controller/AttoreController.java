@@ -18,13 +18,31 @@ public class AttoreController {
     }
 
     @GetMapping
-    public ResponseEntity<?> ricerca(@RequestParam String query) {
+    public ResponseEntity<?> getAll(){
         try{
-            return ResponseEntity.ok(attoreService.ricerca(query));
+            return ResponseEntity.ok(attoreService.getAll());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/paged")
+    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+
+        try{
+            return ResponseEntity.ok(attoreService.getAllPaginated(pageNumber, pageSize));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/cerca")
+    public ResponseEntity<?> ricerca(@RequestParam String query, Integer pageNumber, Integer pageSize) {
+        try{
+            return ResponseEntity.ok(attoreService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
+
 
     @PostMapping("/nuovo")
     public ResponseEntity<?> nuovo(@RequestBody AttoreDto attoreDto){

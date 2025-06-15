@@ -25,4 +25,6 @@ public interface AttoreRepository extends JpaRepository<Attore, Integer> {
     @Lock(LockModeType.OPTIMISTIC)
     @Query("SELECT a.id FROM Attore a WHERE a.id = :attoreIds")
     public Set<Attore> findByIds(@Param("attoreIds") Set<Integer> attoreIds);
+
+    Page<Attore> findAll(Pageable pageable);
 }

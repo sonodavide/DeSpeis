@@ -1,5 +1,6 @@
 package org.example.despeis.services;
 
+import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.dto.UtenteDto;
 import org.example.despeis.dto.UtenteDto;
 import org.example.despeis.mapper.UtenteMapper;
@@ -40,12 +41,26 @@ public class UtenteService {
     }
 
     @Transactional(readOnly = true)
-    public List<UtenteDto> ricerca(String query){
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("cognome"));
+    public PaginatedResponse<UtenteDto> ricerca(String query, Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("cognome"));
         String searchTerm = "%" + query.toLowerCase() + "%";
         Page<Utente> result = utenteRepository.cerca(searchTerm, pageable);
 
-        return result.getContent().stream().map(utenteMapper::toDto).collect(Collectors.toList());
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(utenteMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<UtenteDto> getAllPaginated(Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("cognome"));
+        Page<Utente> result = utenteRepository.findAll(pageable);
+
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(utenteMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements()
+        );
     }
     @Transactional
     public void delete(UtenteDto utenteDto){

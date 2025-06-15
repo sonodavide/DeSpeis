@@ -62,15 +62,29 @@ public class SpettacoloController {
         }
     }
 
-    @PostMapping("/ricerca")
-    public ResponseEntity<?> cercaByDate(@RequestParam("date") String date){
+    @GetMapping("/cerca")
+    public ResponseEntity<?> cercaByDate(@RequestParam("date") String date, Integer pageNumber, Integer pageSize){
         LocalDate d = LocalDate.parse(date);
         try{
-            return ResponseEntity.ok(spettacoloService.getAllByDateRicerca(d));
+            return ResponseEntity.ok(spettacoloService.cerca(d, pageNumber, pageSize));
         }catch(Exception e){
             return new ResponseEntity<>(e.toString()
                     , HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/paged")
+    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+
+        try{
+            return ResponseEntity.ok(spettacoloService.getAllPaginated(pageNumber, pageSize));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+
+
 
 }

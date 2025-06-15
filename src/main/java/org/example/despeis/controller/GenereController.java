@@ -34,11 +34,21 @@ public class GenereController {
             return ResponseEntity.badRequest().build();
         }
     }
-    @GetMapping
-    public ResponseEntity<?> findAll(@RequestParam String query) {
+    @GetMapping("/cerca")
+    public ResponseEntity<?> suggest(@RequestParam String query, Integer pageNumber, Integer pageSize) {
         try{
-            return ResponseEntity.ok(genereService.ricerca(query));
+            return ResponseEntity.ok(genereService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+
+        try{
+            return ResponseEntity.ok(genereService.getAllPaginated(pageNumber, pageSize));
+        }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
     }

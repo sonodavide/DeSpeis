@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import org.example.despeis.dto.FilmDto;
+import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.AttoreMapper;
 import org.example.despeis.mapper.FilmMapper;
 import org.example.despeis.mapper.GenereMapper;
@@ -128,12 +129,20 @@ public class FilmService {
     }
 
     @Transactional(readOnly = true)
-    public List<FilmDto> ricerca(String query){
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("titolo"));
+    public List<FilmDto> ricerca(String query,Integer pageNumber, Integer pageSize ){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("titolo"));
         String searchTerm = query.toLowerCase() + "%";
         Page<Film> result = filmRepository.cerca(searchTerm, pageable);
 
         return result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<FilmDto> getAllPaginated(Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("titolo"));
+        Page<Film> result = filmRepository.findAll(pageable);
+
+        return new PaginatedResponse<>(result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 
 }
