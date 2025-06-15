@@ -1,12 +1,10 @@
 package org.example.despeis.controller;
 
+import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.services.PostiSpettacoloService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -20,10 +18,10 @@ public class PrenotazioneController {
         this.postiSpettacoloService = postiSpettacoloService;
     }
 
-    @GetMapping("/prenota")
-    public ResponseEntity<?> prenota(@RequestParam Set<Integer> postoId, @RequestParam int spettacoloId, @RequestParam int userId){
+    @PostMapping("/prenota")
+    public ResponseEntity<?> prenota(@RequestBody PrenotazioneRequestDto prenotazioneRequestDto){
         try{
-            return ResponseEntity.ok(postiSpettacoloService.prenota(postoId, spettacoloId, userId));
+            return ResponseEntity.ok(postiSpettacoloService.prenota(prenotazioneRequestDto));
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }

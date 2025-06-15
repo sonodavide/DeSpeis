@@ -6,8 +6,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -15,6 +13,8 @@ import java.util.Set;
 @Table(name = "ordine")
 public class Ordine {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ordine_id_gen")
+    @SequenceGenerator(name = "ordine_id_gen", sequenceName = "ordine_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -28,10 +28,7 @@ public class Ordine {
     @JoinColumn(name = "utente", nullable = false)
     private Utente utente;
 
-    @OneToMany(mappedBy = "ordine")
-    private Set<Biglietto> bigliettos = new LinkedHashSet<>();
-
-    @Column(name = "totale")
+    @Column(name = "totale", precision = 38, scale = 2)
     private BigDecimal totale;
 
 }
