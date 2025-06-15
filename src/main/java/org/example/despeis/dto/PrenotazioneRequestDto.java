@@ -7,6 +7,7 @@ import java.util.Set;
 
 @Value
 public class PrenotazioneRequestDto implements Serializable {
-    Set<Integer> postoId;
+    Set<Integer> postiIds;
     Integer userId;
+    Integer spettacoloId;
 }

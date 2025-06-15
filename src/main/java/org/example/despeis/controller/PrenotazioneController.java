@@ -30,7 +30,7 @@ public class PrenotazioneController {
     @GetMapping("/blocca")
     public ResponseEntity<?> blocca(@RequestParam Set<Integer> postoId, @RequestParam int spettacoloId){
         try{
-            return ResponseEntity.ok(postiSpettacoloService.blocca(postoId, spettacoloId));
+            return ResponseEntity.ok(postiSpettacoloService.blocca(postoId));
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }

@@ -1,6 +1,6 @@
 package org.example.despeis.services;
 
-import org.example.despeis.dto.PostispettacoloDto;
+import org.example.despeis.dto.PostiSpettacoloResponseDto;
 import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.mapper.PostispettacoloMapper;
 import org.example.despeis.model.Biglietto;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,17 +40,26 @@ public class PostiSpettacoloService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostispettacoloDto> getBySpettacoloId(int spettacoloId){
-        return postiSpettacoloRepository.findAllBySpettacoloIdOrderByPostoFilaAscPostoSedileAsc(spettacoloId)
-                .stream().map(postiSpettacoloMapper::toDto)
-                .collect(Collectors.toList());
-
+    public PostiSpettacoloResponseDto getBySpettacoloId(int spettacoloId){
+       List<Postispettacolo> postiSpettacolo = postiSpettacoloRepository.findAllBySpettacoloIdOrderByPostoFilaAscPostoSedileAsc(spettacoloId);
+        HashMap<String, List<PostiSpettacoloResponseDto.PostoResponse>> tempMap = new HashMap<>();
+       for(Postispettacolo posto : postiSpettacolo){
+           String filaCorrente = posto.getPosto().getFila();
+           if(!tempMap.containsKey(filaCorrente)){
+                tempMap.put(filaCorrente, new ArrayList<>());
+           }
+           tempMap.get(filaCorrente).add(
+                   new PostiSpettacoloResponseDto.PostoResponse(
+                           posto.getId(), posto.getPosto().getId(), posto.getStato()
+           ));
+       }
+       return new PostiSpettacoloResponseDto(spettacoloId, tempMap);
     }
 
     @Transactional
-    public boolean blocca(Set<Integer> postoId, int spettacoloId) throws Exception{
+    public boolean blocca(Set<Integer> postoId) throws Exception{
         List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(postoId);
-        if(p.size()!=postoId.size()) throw new Exception("non posso prenotare tutti i posto");
+        if(p.size()!=postoId.size()) throw new Exception("posto/i già prenotati");
         for(Postispettacolo posto : p){
             posto.setStato("bloccato");
         }
@@ -60,8 +70,10 @@ public class PostiSpettacoloService {
     public boolean prenota(PrenotazioneRequestDto prenotazione) throws Exception{
         try{
 
-        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(prenotazione.getPostoId());
-        if(p.size()!=prenotazione.getPostoId().size()) throw new Exception("non posso prenotare tutti i posto");
+        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(prenotazione.getPostiIds());
+        if(p.size()!=prenotazione.getPostiIds().size()) {
+            throw new Exception("posto/i già prenotati");
+        }
             ArrayList<Biglietto> biglietti = new ArrayList<>();
             Ordine ordine = new Ordine();
             ordine.setData(LocalDate.now());
