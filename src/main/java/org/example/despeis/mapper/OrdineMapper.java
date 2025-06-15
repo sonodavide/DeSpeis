@@ -8,6 +8,12 @@ import org.mapstruct.*;
 public interface OrdineMapper {
     Ordine toEntity(OrdineDto ordineDto);
 
+    @AfterMapping
+    default void linkBigliettos(@MappingTarget Ordine ordine) {
+        ordine.getBigliettos().forEach(biglietto -> biglietto.setOrdine(ordine));
+    }
+
+    @Mapping(target = "bigliettos", source = "bigliettos") // Mappatura esplicita
     OrdineDto toDto(Ordine ordine);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

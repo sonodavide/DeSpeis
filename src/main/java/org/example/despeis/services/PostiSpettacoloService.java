@@ -1,16 +1,13 @@
 package org.example.despeis.services;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
 import org.example.despeis.dto.PostiSpettacoloResponseDto;
 import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.mapper.PostispettacoloMapper;
-import org.example.despeis.model.Biglietto;
-import org.example.despeis.model.Ordine;
-import org.example.despeis.model.Postispettacolo;
-import org.example.despeis.model.Utente;
-import org.example.despeis.repository.BigliettoRepository;
-import org.example.despeis.repository.OrdineRepository;
-import org.example.despeis.repository.PostispettacoloRepository;
-import org.example.despeis.repository.UtenteRepository;
+import org.example.despeis.model.*;
+import org.example.despeis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,19 +21,25 @@ import java.util.stream.Collectors;
 
 @Service
 public class PostiSpettacoloService {
+    @PersistenceContext
+    private EntityManager entityManager;
     private final PostispettacoloRepository postiSpettacoloRepository;
     private final PostispettacoloMapper postiSpettacoloMapper;
     private final UtenteRepository utenteRepository;
     private final OrdineRepository ordineRepository;
     private final BigliettoRepository bigliettoRepository;
+    private final SpettacoloService spettacoloService;
+    private final SpettacoloRepository spettacoloRepository;
 
     @Autowired
-    public PostiSpettacoloService(PostispettacoloRepository postiSpettacoloRepository, PostispettacoloMapper postiSpettacoloMapper, UtenteRepository utenteRepository, OrdineRepository ordineRepository, BigliettoRepository bigliettoRepository) {
+    public PostiSpettacoloService(PostispettacoloRepository postiSpettacoloRepository, PostispettacoloMapper postiSpettacoloMapper, UtenteRepository utenteRepository, OrdineRepository ordineRepository, BigliettoRepository bigliettoRepository, SpettacoloService spettacoloService, SpettacoloRepository spettacoloRepository) {
         this.postiSpettacoloRepository = postiSpettacoloRepository;
         this.postiSpettacoloMapper = postiSpettacoloMapper;
         this.utenteRepository = utenteRepository;
         this.ordineRepository = ordineRepository;
         this.bigliettoRepository = bigliettoRepository;
+        this.spettacoloService = spettacoloService;
+        this.spettacoloRepository = spettacoloRepository;
     }
 
     @Transactional(readOnly = true)
@@ -70,6 +73,8 @@ public class PostiSpettacoloService {
     public boolean prenota(PrenotazioneRequestDto prenotazione) throws Exception{
         try{
 
+        Spettacolo spettacolo =entityManager.find(Spettacolo.class, prenotazione.getSpettacoloId(), LockModeType.PESSIMISTIC_READ);
+        if(!spettacolo.getAcquistabile()) throw new Exception("non è acquistabile");
         List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(prenotazione.getPostiIds());
         if(p.size()!=prenotazione.getPostiIds().size()) {
             throw new Exception("posto/i già prenotati");
@@ -79,7 +84,7 @@ public class PostiSpettacoloService {
             ordine.setData(LocalDate.now());
             ordine.setStato("confermato");
             Utente utente = utenteRepository.findById(prenotazione.getUserId()).orElseThrow();
-            ordine.setUtente(utente);
+
             ordine = ordineRepository.save(ordine);
             for(Postispettacolo posto : p){
                 posto.setStato("occupato");
@@ -87,6 +92,7 @@ public class PostiSpettacoloService {
                 biglietto.setPostospettacolo(posto);
                 biglietto.setUtente(utente);
                 biglietto.setOrdine(ordine);
+                biglietto.setPrezzo(spettacolo.getPrezzo());
                 biglietti.add(biglietto);
             }
 

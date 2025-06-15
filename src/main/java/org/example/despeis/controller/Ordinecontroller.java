@@ -24,10 +24,11 @@ public class Ordinecontroller {
 
 
     @GetMapping
-    public ResponseEntity<?> getOrdine(@RequestParam(name="user", required = false) Integer userId){
+    public ResponseEntity<?> getOrdine(@RequestParam(name="user", required = false) Integer userId,
+    @RequestParam(name="page", defaultValue = "0") int page){
         ResponseEntity<?> r;
         try{
-            r = userId==null ? ResponseEntity.ok(ordineService.getAll()) : ResponseEntity.ok(ordineService.getById(userId));
+            r = userId==null ? ResponseEntity.ok(ordineService.getAllPaginated(page)) : ResponseEntity.ok(ordineService.getByUserIdPaginated(userId, page));
         }catch (Exception e){
             r= ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -3,6 +3,9 @@ package org.example.despeis.dto;
 import lombok.Value;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * DTO for {@link org.example.despeis.model.Biglietto}
@@ -10,7 +13,12 @@ import java.io.Serializable;
 @Value
 public class BigliettoDto implements Serializable {
     Integer id;
-    UtenteDto utente;
-    OrdineDto ordine;
-    PostispettacoloDto postospettacolo;
+    Integer utenteId;
+    Integer ordineId;
+    PostoDto postospettacoloPosto;
+    LocalDate postospettacoloSpettacoloData;
+    LocalTime postospettacoloSpettacoloOra;
+    Integer postospettacoloSpettacoloSalaId;
+    String postospettacoloSpettacoloFilmTitolo;
+    BigDecimal prezzo;
 }

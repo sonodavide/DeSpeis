@@ -3,6 +3,7 @@ package org.example.despeis.dto;
 import lombok.Value;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * DTO for {@link org.example.despeis.model.Utente}
@@ -13,4 +14,6 @@ public class UtenteDto implements Serializable {
     String username;
     String nome;
     String cognome;
+    LocalDate datanascita;
+    String telefono;
 }

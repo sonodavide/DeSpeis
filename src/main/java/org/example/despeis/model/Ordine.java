@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,11 +26,15 @@ public class Ordine {
     @Column(name = "stato", nullable = false, length = Integer.MAX_VALUE)
     private String stato;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "utente", nullable = false)
-    private Utente utente;
 
     @Column(name = "totale", precision = 38, scale = 2)
     private BigDecimal totale;
+
+    @OneToMany(mappedBy = "ordine")
+    private Set<Biglietto> bigliettos = new LinkedHashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "utente", nullable = false)
+    private Utente utente;
 
 }
