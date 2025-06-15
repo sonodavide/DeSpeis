@@ -10,5 +10,8 @@ import java.util.List;
 
 public interface PostiRepository extends JpaRepository<Posti, Integer> {
     @Lock(LockModeType.OPTIMISTIC)
-    List<Posti> findAllBySala(Sala sala);
+    List<Posti> findAllBySalaOrderByFilaAsc(Sala sala);
+
+    void deleteBySala(Sala sala);
+    void deleteBySalaId(int id);
 }

@@ -139,5 +139,14 @@ e.printStackTrace();
         }
     }
 
+    @GetMapping("/getSenzaFilmAcquistabileById")
+    public ResponseEntity<?> getSenzaFilmAcquistabileById(@RequestParam int id){
+        try{
+            return ResponseEntity.ok(spettacoloService.getSenzaFilmAcquistabileById(id));
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 
 }

@@ -1,7 +1,5 @@
 package org.example.despeis.services;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.*;
 import org.example.despeis.dto.SalaDto;
@@ -11,7 +9,6 @@ import org.example.despeis.mapper.SalaConPostiMapper;
 import org.example.despeis.mapper.SalaMapper;
 import org.example.despeis.model.Posti;
 
-import org.example.despeis.model.Regista;
 import org.example.despeis.model.Sala;
 import org.example.despeis.repository.PostiRepository;
 
@@ -25,9 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,18 +67,23 @@ public class SalaService {
                 controllo se ci sono spettacoli acquistabili con questa sala. In caso,
                 ne impedisco la modifica.
                 */
-                if(spettacoloRepository.findFirstBySalaAndAcquistabileTrue(nuovaSala)!=null) throw new BadRequestException();
+                if(spettacoloRepository.findFirstBySalaAndAcquistabileTrueAndNonPassati(nuovaSala)!=null) throw new BadRequestException();
+                postiRepository.deleteBySalaId(nuovaSala.getId());
+                postiRepository.flush();
+
             }
-            Sala sala = salaRepository.save(nuovaSala);
-
-
+            List<Posti> postiLista = new ArrayList<>();
+            nuovaSala=salaRepository.save(nuovaSala);
             for(PostiDto posti : salaDto.getPostis()){
-                Posti p = postiMapper.toEntity(posti);
-                p.setSala(sala);
-                postiRepository.save(p);
+                Posti p = new Posti();
+                p.setFila(posti.getFila());
+                p.setSedili(posti.getSedili());
+                p.setSala(nuovaSala);
+                postiLista.add(p);
 
             }
-            return salaMapper.toDto(sala);
+            postiRepository.saveAll(postiLista);
+            return salaMapper.toDto(nuovaSala);
         }catch (Exception e){
             e.printStackTrace();
             return null;
@@ -101,7 +101,10 @@ public class SalaService {
 
     @Transactional(readOnly = true)
     public SalaConPostiDto getSalaConPostiPerFila(Integer salaId){
-        return salaConPostiMapper.toDto(salaRepository.findById(salaId).orElseThrow(() -> new NoSuchElementException()));
+        Sala s = salaRepository.findById(salaId).orElseThrow(() -> new NoSuchElementException());
+        List<Posti> postiDiS = postiRepository.findAllBySalaOrderByFilaAsc(s);
+
+        return new SalaConPostiDto(salaId, postiDiS.stream().map(postiMapper::toDto).collect(Collectors.toList()));
 
     }
 

@@ -34,18 +34,19 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
                                                @Param("oraInizio") LocalTime oraInizio,
                                                @Param("dataFine") LocalDate dataFine,
                                                @Param("oraFine") LocalTime oraFine);
-    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE and s.acquistabile=true")
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE  and s.acquistabile=true")
     List<Spettacolo> findSpettacoliAcquistabili();
     @Lock(LockModeType.OPTIMISTIC)
-    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE and s.acquistabile=true and s.id = :id")
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE  and s.acquistabile=true and s.id = :id")
     Spettacolo findSpettacoloAcquistabileById(int id);
-    Spettacolo findFirstBySalaAndAcquistabileTrue(Sala sala);
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE  and s.sala=:sala and s.acquistabile=true")
+    Spettacolo findFirstBySalaAndAcquistabileTrueAndNonPassati(Sala sala);
 
-    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE")
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE ")
     List<Spettacolo> findProssimiSpettacoli();
 
     @Lock(LockModeType.OPTIMISTIC)
-    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE and s.film = :film ")
+    @Query("SELECT s FROM Spettacolo s WHERE  s.data >= CURRENT_DATE and s.film = :film ")
     List<Spettacolo> findProssimiSpettacoliByFilm(Film film);
 
 
