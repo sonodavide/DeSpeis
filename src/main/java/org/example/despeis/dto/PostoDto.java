@@ -13,5 +13,4 @@ public class PostoDto implements Serializable {
     Integer id;
     String fila;
     Integer sedile;
-    Boolean occupato;
 }
