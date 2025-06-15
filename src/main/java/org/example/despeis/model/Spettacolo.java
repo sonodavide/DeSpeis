@@ -33,4 +33,8 @@ public class Spettacolo {
     @JoinColumn(name = "sala", nullable = false)
     private Sala sala;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "film", nullable = false)
+    private Film film;
+
 }

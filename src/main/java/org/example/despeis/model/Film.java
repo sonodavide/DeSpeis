@@ -1,12 +1,12 @@
 package org.example.despeis.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,5 +26,17 @@ public class Film {
 
     @Column(name = "trama", nullable = false, length = Integer.MAX_VALUE)
     private String trama;
+
+    @ManyToMany(mappedBy = "films")
+    private Set<Attore> attores = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "films")
+    private Set<Genere> generes = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "films")
+    private Set<Regista> registas = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "film")
+    private Set<Spettacolo> spettacolos = new LinkedHashSet<>();
 
 }
