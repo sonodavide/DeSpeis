@@ -2,12 +2,11 @@ package org.example.despeis.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.example.despeis.dto.NuovoSpettacoloDto;
-import org.example.despeis.dto.PostispettacoloDto;
-import org.example.despeis.dto.PostoDto;
-import org.example.despeis.dto.SpettacoloDto;
+import org.example.despeis.dto.*;
+import org.example.despeis.mapper.FilmMapper;
 import org.example.despeis.mapper.PostispettacoloMapper;
 import org.example.despeis.mapper.SpettacoloMapper;
+import org.example.despeis.mapper.SpettacoloSenzaFilmMapper;
 import org.example.despeis.model.*;
 import org.example.despeis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,8 +34,10 @@ public class SpettacoloService {
     private final PostispettacoloRepository postispettacoloRepository;
     private final PostoRepository postoRepository;
     private final PostispettacoloMapper postispettacoloMapper;
+    private final SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper;
+    private final FilmMapper filmMapper;
     @Autowired
-    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostoRepository postoRepository, PostispettacoloMapper postispettacoloMapper) {
+    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostoRepository postoRepository, PostispettacoloMapper postispettacoloMapper, SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper, FilmMapper filmMapper) {
         this.spettacoloRepository = spettacoloRepository;
         this.spettacoloMapper = spettacoloMapper;
         this.filmRepository = filmRepository;
@@ -43,8 +45,9 @@ public class SpettacoloService {
         this.postispettacoloRepository = postispettacoloRepository;
         this.postoRepository = postoRepository;
         this.postispettacoloMapper = postispettacoloMapper;
+        this.spettacoloSenzaFilmMapper = spettacoloSenzaFilmMapper;
+        this.filmMapper = filmMapper;
     }
-
 
     @Transactional(readOnly = true)
     public List<SpettacoloDto> getAll(){
@@ -63,11 +66,34 @@ public class SpettacoloService {
         return r;
     }
     @Transactional(readOnly = true)
-    public List<SpettacoloDto> getByDate(LocalDate date){
-        List<Spettacolo> spettacoli = spettacoloRepository.findAllByDataOrderByFilmTitoloAscOraAsc(date);
-        return spettacoli.stream()
-                .map(spettacoloMapper::toDto)
-                .collect(Collectors.toList());
+    public List<FilmSpettacoliDto> getByDate(LocalDate date) throws Exception {
+        try{
+            List<Spettacolo> spettacoli = spettacoloRepository.findAllByDataOrderByFilmTitoloAscOraAsc(date);
+
+
+            List<SpettacoloSenzaFilmDto> spettacoliSenzaFilmDto = spettacoli.stream()
+                    .map(spettacoloSenzaFilmMapper::toDto)
+                    .collect(Collectors.toList());
+
+            HashMap<FilmDto, ArrayList<SpettacoloSenzaFilmDto>> tempMap = new HashMap<>();
+
+
+            for(Spettacolo s : spettacoli){
+                FilmDto curretFilm = filmMapper.toDto(s.getFilm());
+                if(!tempMap.containsKey(curretFilm)) {
+                    tempMap.put(filmMapper.toDto(s.getFilm()), new ArrayList<SpettacoloSenzaFilmDto>());
+                }
+                tempMap.get(curretFilm).add(spettacoloSenzaFilmMapper.toDto(s));
+            }
+            return tempMap.entrySet().stream()
+                    .map(entry -> new FilmSpettacoliDto(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new Exception();
+        }
+
+
     }
 
     @Transactional

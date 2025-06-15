@@ -25,7 +25,8 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.getByDate(d));
         }catch(Exception e){
-            return new ResponseEntity<>("no", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.toString()
+                    , HttpStatus.BAD_REQUEST);
         }
     }
 
