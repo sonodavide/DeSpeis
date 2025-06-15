@@ -8,6 +8,7 @@ import org.example.despeis.services.FilmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
@@ -40,7 +41,7 @@ public class FilmController {
 
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody FilmDto film){
+    public ResponseEntity<?> nuovo(@Validated @RequestBody FilmDto film){
         try{
             return ResponseEntity.ok(filmService.nuovoFilm(film));
         }catch (IllegalStateException e){
@@ -56,7 +57,7 @@ e.printStackTrace();
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
-    public ResponseEntity<?> elimina(@RequestBody FilmDto film){
+    public ResponseEntity<?> elimina(@Validated @RequestBody FilmDto film){
         try{
             return ResponseEntity.ok(filmService.elimina(film));
         }catch (Exception e){
@@ -105,4 +106,13 @@ e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("ultimeUscite")
+    public ResponseEntity<?> ultimeUscite(){
+        try{
+            return ResponseEntity.ok(filmService.ultimeUscite());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+     }
 }

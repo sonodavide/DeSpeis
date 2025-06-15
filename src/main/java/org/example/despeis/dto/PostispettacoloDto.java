@@ -1,5 +1,6 @@
 package org.example.despeis.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -9,9 +10,13 @@ import java.io.Serializable;
  */
 @Value
 public class PostispettacoloDto implements Serializable {
+    @NotNull
     Integer id;
+    @NotNull
     Integer sedile;
+    @NotNull
     String stato;
+    @NotNull
     String fila;
 
 

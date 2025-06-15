@@ -1,5 +1,6 @@
 package org.example.despeis.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Value;
 import org.example.despeis.model.Film;
 
@@ -13,12 +14,20 @@ import java.util.Set;
 @Value
 public class FilmDto implements Serializable {
     Integer id;
+    @NotNull
     String titolo;
+    @NotNull
     Integer durata;
+    @NotNull
     String trama;
+    @NotNull
     String img;
+    @NotNull
     LocalDate datauscita;
+    @NotNull
     Set<AttoreDto> attores;
+    @NotNull
     Set<GenereDto> generes;
+    @NotNull
     Set<RegistaDto> registas;
 }

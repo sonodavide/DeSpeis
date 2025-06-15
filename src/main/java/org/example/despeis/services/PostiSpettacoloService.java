@@ -8,7 +8,7 @@ import org.example.despeis.dto.PostiSpettacoloResponseDto;
 import org.example.despeis.dto.PostispettacoloDto;
 import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.mapper.PostispettacoloMapper;
-import org.example.despeis.mapper.SpettacoloSenzaFilmMapper;
+import org.example.despeis.mapper.SpettacoloSenzaFilmTagsMapper;
 import org.example.despeis.model.*;
 import org.example.despeis.repository.*;
 import org.example.despeis.security.Utils;
@@ -30,21 +30,45 @@ public class PostiSpettacoloService {
     private final UtenteRepository utenteRepository;
     private final OrdineRepository ordineRepository;
     private final BigliettoRepository bigliettoRepository;
-    private final SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper;
+    private final SpettacoloSenzaFilmTagsMapper spettacoloSenzaFilmTagsMapper;
     private final SpettacoloRepository spettacoloRepository;
 
     @Autowired
-    public PostiSpettacoloService(PostispettacoloRepository postiSpettacoloRepository, PostispettacoloMapper postiSpettacoloMapper, UtenteRepository utenteRepository, OrdineRepository ordineRepository, BigliettoRepository bigliettoRepository, SpettacoloRepository spettacoloRepository, SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper) {
+    public PostiSpettacoloService(PostispettacoloRepository postiSpettacoloRepository, PostispettacoloMapper postiSpettacoloMapper, UtenteRepository utenteRepository, OrdineRepository ordineRepository, BigliettoRepository bigliettoRepository, SpettacoloRepository spettacoloRepository, SpettacoloSenzaFilmTagsMapper spettacoloSenzaFilmTagsMapper) {
         this.postiSpettacoloRepository = postiSpettacoloRepository;
         this.postiSpettacoloMapper = postiSpettacoloMapper;
         this.utenteRepository = utenteRepository;
         this.ordineRepository = ordineRepository;
         this.bigliettoRepository = bigliettoRepository;
-        this.spettacoloSenzaFilmMapper=spettacoloSenzaFilmMapper;
+        this.spettacoloSenzaFilmTagsMapper = spettacoloSenzaFilmTagsMapper;
         this.spettacoloRepository = spettacoloRepository;
     }
 
     @Transactional(readOnly = true)
+    public PostiSpettacoloResponseDto getAcquistabileBySpettacoloId(int spettacoloId) throws BadRequestException {
+        Spettacolo spettacolo = spettacoloRepository.findById(spettacoloId).orElseThrow(() -> new BadRequestException());
+        List<Postispettacolo> postiSpettacolo = postiSpettacoloRepository.findAllBySpettacoloIdOrderByFilaAscSedileAscAcquistabile(spettacolo.getId());
+        List<PostiSpettacoloResponseDto.PostiPerFila> postiPerFila = new ArrayList<>();
+        for(Postispettacolo ps : postiSpettacolo){
+            boolean trovato = false;
+            for(PostiSpettacoloResponseDto.PostiPerFila ppf :postiPerFila){
+                if(ppf.getFila().equals(ps.getFila())){
+                    ppf.getPosti().add(new PostiResponse(ps.getId(), ps.getSedile(), ps.getStato()));
+                    trovato = true;
+                    break;
+                }
+            }
+            if(!trovato){
+                List<PostiResponse> qualcosa = new ArrayList<>();
+                qualcosa.add(new PostiResponse(ps.getId(), ps.getSedile(), ps.getStato()));
+                postiPerFila.add(new PostiSpettacoloResponseDto.PostiPerFila(ps.getFila(), qualcosa));
+
+            }
+        }
+
+       return new PostiSpettacoloResponseDto(spettacoloSenzaFilmTagsMapper.toDto(spettacolo), postiPerFila);
+    }
+
     public PostiSpettacoloResponseDto getBySpettacoloId(int spettacoloId) throws BadRequestException {
         Spettacolo spettacolo = spettacoloRepository.findById(spettacoloId).orElseThrow(() -> new BadRequestException());
         List<Postispettacolo> postiSpettacolo = postiSpettacoloRepository.findAllBySpettacoloIdOrderByFilaAscSedileAsc(spettacolo.getId());
@@ -66,8 +90,10 @@ public class PostiSpettacoloService {
             }
         }
 
-       return new PostiSpettacoloResponseDto(spettacoloSenzaFilmMapper.toDto(spettacolo), postiPerFila);
+        return new PostiSpettacoloResponseDto(spettacoloSenzaFilmTagsMapper.toDto(spettacolo), postiPerFila);
     }
+
+
 
     @Transactional
     public PostiSpettacoloResponseDto blocca(PrenotazioneRequestDto prenotazioneRequestDto) throws BadRequestException{
@@ -89,13 +115,13 @@ public class PostiSpettacoloService {
 
         }
         postiSpettacoloRepository.saveAll(p);
-        return getBySpettacoloId(p.get(0).getSpettacolo().getId());
+        return getAcquistabileBySpettacoloId(p.get(0).getSpettacolo().getId());
     }
     @Transactional
     public boolean prenota(JwtAuthenticationToken authenticationToken, PrenotazioneRequestDto prenotazione) throws Exception{
         int numeroPostiPrenotati=calcolaPostiPrenotati(prenotazione.getPostiSpettacoloResponseDto());
         String userId = Utils.getUserId(authenticationToken);
-        Spettacolo spettacolo = spettacoloRepository.findSpettacoloAcquistabileById(prenotazione.getPostiSpettacoloResponseDto().getSpettacoloSenzaFilmDto().getId());
+        Spettacolo spettacolo = spettacoloRepository.findSpettacoloAcquistabileById(prenotazione.getPostiSpettacoloResponseDto().getSpettacoloSenzaFilmTagsDto().getId());
         if(spettacolo == null || !spettacolo.getAcquistabile() || spettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
 
         if( spettacolo.getPrezzo().multiply(new BigDecimal(numeroPostiPrenotati)).compareTo(prenotazione.getPrezzo()) != 0) throw new BadRequestException();

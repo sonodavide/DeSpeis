@@ -33,11 +33,11 @@ public class Spettacolo {
     private BigDecimal prezzo;
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "sala", nullable = false)
+    @JoinColumn(name = "sala")
     private Sala sala;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "film", nullable = false)
+    @JoinColumn(name = "film")
     private Film film;
 
     @Column(name = "acquistabile", nullable = false)

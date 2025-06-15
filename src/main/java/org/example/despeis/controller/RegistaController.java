@@ -6,6 +6,7 @@ import org.example.despeis.services.RegistaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +20,7 @@ public class RegistaController {
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody RegistaDto registaDto){
+    public ResponseEntity<?> nuovo(@Validated @RequestBody RegistaDto registaDto){
         try{
             return ResponseEntity.ok(registaService.nuovo(registaDto));
         }catch (BadRequestException e){
@@ -32,7 +33,7 @@ e.printStackTrace();
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
-    public ResponseEntity<?> elimina(@RequestBody RegistaDto registaDto){
+    public ResponseEntity<?> elimina(@Validated @RequestBody RegistaDto registaDto){
         try{
             registaService.delete(registaDto);
             return ResponseEntity.ok("ok");

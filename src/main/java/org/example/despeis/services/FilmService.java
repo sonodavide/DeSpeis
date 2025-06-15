@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -117,7 +118,7 @@ public class FilmService {
                         throw new IllegalStateException("Accavallamento");
                     }
                     spettacolo.setDataFine(fine.toLocalDate());
-                    spettacolo.setOraFine(fine.toLocalTime());
+                    spettacolo.setOraFine(fine.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
                 }
             }
         }
@@ -171,6 +172,9 @@ public class FilmService {
     }
     @Transactional
     public FilmDto elimina(FilmDto film){
+        Film f = entityManager.find(Film.class, film.getId());
+        if(!spettacoloRepository.findProssimiSpettacoliByFilm(f).isEmpty()) throw new IllegalStateException();
+        entityManager.createQuery("UPDATE Spettacolo s SET s.film = null WHERE s.film = :film").setParameter("film", film).executeUpdate();
         filmRepository.deleteById(film.getId());
         return film;
     }
@@ -217,8 +221,10 @@ public class FilmService {
         return new PaginatedResponse<>(result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 
-    @Transactional
-    public  void elimina(int id){
-        filmRepository.deleteById(id);
+
+
+    @Transactional(readOnly = true)
+    public List<FilmDto> ultimeUscite() {
+        return filmRepository.ultimeUscite().stream().map(filmMapper::toDto).collect(Collectors.toList());
     }
 }
