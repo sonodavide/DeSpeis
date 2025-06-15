@@ -13,10 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.antlr.v4.runtime.tree.xpath.XPath.findAll;
 
 @Service
 public class OrdineService {
@@ -25,7 +22,6 @@ public class OrdineService {
 
 
 
-    private final int pageSize=10;
     @Autowired
     public OrdineService(OrdineRepository ordineRepository, OrdineMapper ordineMapper) {
         this.ordineRepository = ordineRepository;
@@ -35,8 +31,8 @@ public class OrdineService {
 
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<OrdineDto> getAllPaginated(int page) {
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("data").descending());
+    public PaginatedResponse<OrdineDto> getAllPaginated(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data").descending());
         Page<Ordine> result = ordineRepository.findAll(pageable);
         return new PaginatedResponse<OrdineDto>(result.getContent().stream()
                 .map(ordineMapper::toDto)
@@ -44,9 +40,9 @@ public class OrdineService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<OrdineDto> getByUserIdPaginated(int userId, int page) {
+    public PaginatedResponse<OrdineDto> getAllByUserPaginated(int userId, int pageNumber, int pageSize) {
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("data").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data").descending());
         Page<Ordine> result = ordineRepository.findAllByUtenteId(userId, pageable);
         return new PaginatedResponse<OrdineDto>(result.getContent().stream()
                 .map(ordineMapper::toDto)

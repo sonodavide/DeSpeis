@@ -1,9 +1,11 @@
 package org.example.despeis.services;
 
 import org.example.despeis.dto.BigliettoDto;
+import org.example.despeis.dto.OrdineDto;
 import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.BigliettoMapper;
 import org.example.despeis.model.Biglietto;
+import org.example.despeis.model.Ordine;
 import org.example.despeis.repository.BigliettoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -54,5 +56,16 @@ public class BigliettoService {
     public List<BigliettoDto> getByDate(LocalDate date){
         return bigliettoRepository.findByPostospettacoloSpettacoloData(date).stream()
                 .map(bigliettoMapper::toDto).collect(Collectors.toList());
+    }
+
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<BigliettoDto> getAllByUserPaginated(int userId, int pageNumber, int pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("ordine.data").descending());
+        Page<Biglietto> result = bigliettoRepository.findAllByUtenteId(userId, pageable);
+        return new PaginatedResponse<BigliettoDto>(result.getContent().stream()
+                .map(bigliettoMapper::toDto)
+                .collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 }
