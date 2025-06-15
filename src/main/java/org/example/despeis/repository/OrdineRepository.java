@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface OrdineRepository extends JpaRepository<Ordine, Integer> {
 
-
+    List<Ordine> findAllByOrderByDataDesc();
     List<Ordine> findAllByUtenteIdOrderByDataDesc(Integer userId);
 }
