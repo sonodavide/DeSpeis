@@ -120,19 +120,22 @@ public class SpettacoloService {
         List<Postispettacolo> postiEsistenti;
         List<Integer> spettacoliProblematici;
         List<Posti> posti;
-
+        boolean iniziato = false;
         nuovoSpettacolo.setOra(nuovoSpettacolo.getOra().truncatedTo(ChronoUnit.MINUTES));
-        if(nuovoSpettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
+
         if(nuovoSpettacolo.getPrezzo().compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException();
         Spettacolo s;
+
+
             if (nuovoSpettacolo.getId() == null) {
                 s = new Spettacolo();
+                if(LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra()).isBefore(LocalDateTime.now())) throw new BadRequestException();
             } else {
                 s = entityManager.find(Spettacolo.class, nuovoSpettacolo.getId(), LockModeType.OPTIMISTIC);
                 if(s==null) throw new BadRequestException();
-
-
-
+                //se è finito, impedisco la modifica
+                if(LocalDateTime.of(s.getDataFine(), s.getOraFine()).isBefore(LocalDateTime.now())) throw new BadRequestException();
+                iniziato = LocalDateTime.now().isAfter(LocalDateTime.of(s.getData(), s.getOra())) && LocalDateTime.now().isBefore(LocalDateTime.of(s.getDataFine(), s.getOraFine()));
 
 
 
@@ -145,6 +148,10 @@ public class SpettacoloService {
             Film nuovoFilm = entityManager.find(Film.class, nuovoSpettacolo.getFilm().getId(), LockModeType.OPTIMISTIC);
             if(nuovoFilm==null) throw new BadRequestException();
             if(s.getFilm()==null || !s.getFilm().equals(nuovoFilm)){
+                //se è in corso, impedisco la modifica del film.
+                if(iniziato) throw new BadRequestException();
+
+
                 Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
                 LocalDateTime inizio = LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra());
                 LocalDateTime fine = inizio.plus(durata);
@@ -170,11 +177,12 @@ public class SpettacoloService {
 
         List<Postispettacolo> psList = new ArrayList<>();
 
-        //Optimistic lock da mettere alla sala
         Sala nuovaSala = entityManager.find(Sala.class, nuovoSpettacolo.getSala().getId(), LockModeType.OPTIMISTIC);
         if(nuovaSala==null) throw new BadRequestException();
         if( s.getSala() == null || !s.getSala().equals(nuovaSala)) {
             if(s.getId()!=null){
+                //se è in corso, impedisco la modifica del film.
+                if(iniziato) throw new BadRequestException();
                 //impedisco la modifica della sala nel caso in cui ci sono già posti prenotati
                 postiEsistenti = postispettacoloRepository.findBySpettacoloId(s.getId());
                 for(Postispettacolo p : postiEsistenti)
@@ -250,5 +258,40 @@ public class SpettacoloService {
         Spettacolo spettacolo = spettacoloRepository.findById(id).orElseThrow(() -> new Exception());
         if(spettacolo==null) throw new Exception();
         return spettacoloSenzaFilmTagsMapper.toDto(spettacolo);
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<SpettacoloSenzaFilmTagsDto> getAllSenzaFilmTags(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora").descending());
+        Page<Spettacolo> result = spettacoloRepository.findAll(pageable);
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(spettacoloSenzaFilmTagsMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<SpettacoloSenzaFilmTagsDto> cercaSenzaFilmTags(LocalDate date, Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data", "ora").descending());
+        Page<Spettacolo> result = spettacoloRepository.findAllByDataOrderByFilmTitoloAscOraAsc(date, pageable);
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(spettacoloSenzaFilmTagsMapper::toDto).collect(Collectors.toList()),
+                result.getTotalPages(), result.getTotalElements());
+
+    }
+
+    @Transactional(readOnly = true)
+    public NuovoSpettacoloDto getNuovoSpettacoloById(int id) throws Exception {
+        return nuovoSpettacoloMapper.toDto(spettacoloRepository.findById(id).orElseThrow(() -> new Exception()));
+    }
+
+    @Transactional(readOnly = true)
+    public String getStato(int id) throws Exception {
+        Spettacolo s = spettacoloRepository.findById(id).orElseThrow(() -> new Exception());
+        LocalDateTime fine = LocalDateTime.of(s.getDataFine(), s.getOraFine());
+        LocalDateTime inizio = LocalDateTime.of(s.getData(), s.getOra());
+    if(LocalDateTime.now().isAfter(fine)) return "finito";
+        if(LocalDateTime.now().isAfter(inizio)) return  "iniziato";
+        return "non iniziato";
+
     }
 }

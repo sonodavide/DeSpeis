@@ -151,7 +151,7 @@ e.printStackTrace();
     }
 
     @GetMapping("/getSenzaFilmAcquistabileById")
-    public ResponseEntity<?> getSenzaFilmAcquistabileById(@RequestParam int id){
+    public ResponseEntity<?> getSenzaFilmAcquistabileById(@NotNull @RequestParam int id){
         try{
             return ResponseEntity.ok(spettacoloService.getSenzaFilmAcquistabileById(id));
         }catch (Exception e){
@@ -168,5 +168,47 @@ e.printStackTrace();
         }
     }
 
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/getAllSenzaFilmTags")
+    public ResponseEntity<?> getAllSenzaFilmTags(@RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize) {
 
+        try {
+            return ResponseEntity.ok(spettacoloService.getAllSenzaFilmTags(pageNumber, pageSize));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/cercaSenzaFilmTags")
+    public ResponseEntity<?> cercaByDateSenzaFilmTags(@RequestParam("date") String date, @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
+        LocalDate d = LocalDate.parse(date);
+        try{
+            return ResponseEntity.ok(spettacoloService.cercaSenzaFilmTags(d, pageNumber, pageSize));
+        }catch(Exception e){
+            return new ResponseEntity<>(e.toString()
+                    , HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/getNuovoSpettacoloById")
+    public ResponseEntity<?> getNuovoSpettacoloById(@NotNull @RequestParam int id){
+        try{
+            return ResponseEntity.ok(spettacoloService.getNuovoSpettacoloById(id));
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/getStato")
+    public ResponseEntity<?> isFinito(@NotNull @RequestParam int id){
+        try{
+            return ResponseEntity.ok(spettacoloService.getStato(id));
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
