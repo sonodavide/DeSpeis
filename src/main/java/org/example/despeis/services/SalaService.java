@@ -9,6 +9,7 @@ import org.example.despeis.mapper.PostiMapper;
 
 import org.example.despeis.mapper.SalaConPostiMapper;
 import org.example.despeis.mapper.SalaMapper;
+import org.example.despeis.model.Film;
 import org.example.despeis.model.Posti;
 
 import org.example.despeis.model.Sala;
@@ -58,28 +59,16 @@ public class SalaService {
     public boolean delete(Integer salaId) throws BadRequestException {
         Sala s = entityManager.find(Sala.class, salaId);
         if(s == null) throw new BadRequestException();
-        if(spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(s)!=null) throw new IllegalStateException();
+        if(!spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(s).isEmpty()) throw new IllegalStateException();
         entityManager.createQuery("UPDATE Spettacolo s SET s.sala = null WHERE s.sala.id = :salaId").setParameter("salaId", salaId).executeUpdate();
         salaRepository.deleteById(salaId);
         return true;
     }
     @Transactional
     public SalaDto nuovo(SalaConPostiDto salaDto) throws BadRequestException{
-        try{
-            Sala nuovaSala;
-            if(salaDto.getId() == null){
-                nuovaSala = new Sala();
-            } else {
-                nuovaSala = salaRepository.findById(salaDto.getId()).orElseThrow(() -> new BadRequestException());
-                /*
-                controllo se ci sono spettacoli acquistabili con questa sala. In caso,
-                ne impedisco la modifica.
-                */
-                if(spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(nuovaSala)!=null) throw new BadRequestException();
-                postiRepository.deleteBySalaId(nuovaSala.getId());
-                postiRepository.flush();
-
-            }
+            if(entityManager.find(Sala.class, salaDto.getId()) != null) throw new BadRequestException();
+            Sala nuovaSala = new Sala();
+            nuovaSala.setId(salaDto.getId());
             List<Posti> postiLista = new ArrayList<>();
             nuovaSala=salaRepository.save(nuovaSala);
             for(PostiDto posti : salaDto.getPostis()){
@@ -92,10 +81,6 @@ public class SalaService {
             }
             postiRepository.saveAll(postiLista);
             return salaMapper.toDto(nuovaSala);
-        }catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }
     }
 
     @Transactional(readOnly = true)
@@ -119,5 +104,41 @@ public class SalaService {
     @Transactional(readOnly = true)
     public Long count(){
         return salaRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean esisteInUnoSpettacoloAcquistabile(int salaId) {
+        return !spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(entityManager.find(Sala.class, salaId)).isEmpty();
+
+    }
+
+
+    @Transactional
+    public SalaDto modifica(SalaConPostiDto salaDto) throws BadRequestException {
+
+        Sala nuovaSala;
+        if (salaDto.getId() == null) throw new BadRequestException();
+
+        nuovaSala = salaRepository.findById(salaDto.getId()).orElseThrow(() -> new IllegalStateException());
+
+
+        if (!spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(nuovaSala).isEmpty())
+            throw new BadRequestException();
+        postiRepository.deleteBySalaId(nuovaSala.getId());
+        postiRepository.flush();
+
+
+        List<Posti> postiLista = new ArrayList<>();
+        nuovaSala = salaRepository.save(nuovaSala);
+        for (PostiDto posti : salaDto.getPostis()) {
+            Posti p = new Posti();
+            p.setFila(posti.getFila());
+            p.setSedili(posti.getSedili());
+            p.setSala(nuovaSala);
+            postiLista.add(p);
+
+        }
+        postiRepository.saveAll(postiLista);
+        return salaMapper.toDto(nuovaSala);
     }
 }

@@ -33,9 +33,28 @@ public class SalaController {
         }
         catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }catch (IllegalStateException e){
+            return ResponseEntity.status(409).build();
         }
         catch (Exception e){
 e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @PostMapping("/modifica")
+    public ResponseEntity<?> modifica(@Validated @RequestBody SalaConPostiDto sala){
+        try{
+            return ResponseEntity.ok(salaService.modifica(sala));
+        }
+        catch (BadRequestException e){
+            return ResponseEntity.badRequest().build();
+        }catch (IllegalStateException e){
+            return ResponseEntity.status(409).build();
+        }
+        catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -82,6 +101,16 @@ e.printStackTrace();
         }catch (Exception e){
 e.printStackTrace();
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("esisteInUnoSpettacoloDaProiettare")
+    public ResponseEntity<?> esisteInUnoSpettacoloDaProiettare(@RequestParam("id") int id){
+        try{
+            return ResponseEntity.ok(salaService.esisteInUnoSpettacoloAcquistabile(id));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
         }
     }
 }

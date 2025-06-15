@@ -60,7 +60,10 @@ e.printStackTrace();
     public ResponseEntity<?> elimina(@Validated @RequestBody FilmDto film){
         try{
             return ResponseEntity.ok(filmService.elimina(film));
-        }catch (Exception e){
+        }catch (IllegalStateException e){
+            return ResponseEntity.status(409).build();
+        }
+        catch (Exception e){
 e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
@@ -114,5 +117,15 @@ e.printStackTrace();
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
-     }
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("esisteInUnoSpettacoloDaProiettare")
+    public ResponseEntity<?> esisteInUnoSpettacoloDaProiettare(@RequestParam("id") int id){
+        try{
+            return ResponseEntity.ok(filmService.esisteInUnoSpettacoloAcquistabile(id));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

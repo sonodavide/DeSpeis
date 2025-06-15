@@ -120,8 +120,9 @@ public class SpettacoloService {
         List<Postispettacolo> postiEsistenti;
         List<Integer> spettacoliProblematici;
         List<Posti> posti;
+
         nuovoSpettacolo.setOra(nuovoSpettacolo.getOra().truncatedTo(ChronoUnit.MINUTES));
-        //if(nuovoSpettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
+        if(nuovoSpettacolo.getData().isBefore(LocalDate.now())) throw new BadRequestException();
         if(nuovoSpettacolo.getPrezzo().compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException();
         Spettacolo s;
             if (nuovoSpettacolo.getId() == null) {
@@ -129,7 +130,7 @@ public class SpettacoloService {
             } else {
                 s = entityManager.find(Spettacolo.class, nuovoSpettacolo.getId(), LockModeType.OPTIMISTIC);
                 if(s==null) throw new BadRequestException();
-                if(s.getDataFine().isAfter(LocalDate.now()) && s.getOraFine().isAfter(LocalTime.now())) throw new IllegalStateException();
+
 
 
 
@@ -153,14 +154,15 @@ public class SpettacoloService {
                         nuovoSpettacolo.getData(),
                         nuovoSpettacolo.getOra(),
                         fine.toLocalDate(),
-                        fine.toLocalTime());
+                        fine.toLocalTime(),
+                        s.getId());
                 if(!spettacoliProblematici.isEmpty()){
                     System.out.println("sala occupata a quell'ora");
                     throw new IllegalStateException("La sala è occupata in quell'orario.");
                 }
                 s.setData(nuovoSpettacolo.getData());
                 s.setOra(nuovoSpettacolo.getOra().truncatedTo(ChronoUnit.MINUTES));
-                s.setDataFine(inizio.toLocalDate());
+                s.setDataFine(fine.toLocalDate());
                 s.setOraFine(fine.toLocalTime());
                 s.setFilm(nuovoFilm);
             }

@@ -23,7 +23,7 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
     @Lock(LockModeType.OPTIMISTIC)
     @Query("SELECT s.id " +
             "FROM Spettacolo s " +
-            "WHERE s.sala.id = :sala AND (" +
+            "WHERE s.sala.id = :sala and s.id != :spettacoloId AND (" +
             "(:dataInizio >= s.data AND :oraInizio >= s.ora AND :dataFine <= s.dataFine AND :oraFine <= s.oraFine) OR " +
             "(:dataInizio <= s.data AND :oraInizio <= s.ora AND :dataFine >= s.data AND :oraFine >= s.ora) OR " +
             "(:dataInizio <= s.dataFine AND :oraInizio <= s.oraFine AND :oraFine >= s.oraFine AND :dataFine >= s.dataFine) OR " +
@@ -33,22 +33,22 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
                                                @Param("dataInizio") LocalDate data,
                                                @Param("oraInizio") LocalTime oraInizio,
                                                @Param("dataFine") LocalDate dataFine,
-                                               @Param("oraFine") LocalTime oraFine);
-    @Query("SELECT s FROM Spettacolo s WHERE s.dataFine >= CURRENT_DATE and s.oraFine >= CURRENT_TIME  and s.acquistabile=true")
+                                               @Param("oraFine") LocalTime oraFine,
+                                                @Param("spettacoloId") Integer spettacoloId);
+    @Query("SELECT s FROM Spettacolo s WHERE (s.dataFine > CURRENT_DATE or (s.dataFine = CURRENT_DATE and s.oraFine >= CURRENT_TIME))  and s.acquistabile=true")
     List<Spettacolo> findSpettacoliAcquistabili();
     @Lock(LockModeType.OPTIMISTIC)
-    @Query("SELECT s FROM Spettacolo s WHERE s.dataFine >= CURRENT_DATE and s.oraFine >= CURRENT_TIME  and s.acquistabile=true and s.id = :id")
-    Spettacolo findSpettacoloAcquistabileById(int id);
-    @Query("SELECT s FROM Spettacolo s WHERE s.dataFine >= CURRENT_DATE and s.oraFine >= CURRENT_TIME and s.sala=:sala and s.acquistabile=true")
-    Spettacolo findBySalaAndAcquistabileTrueAndNonPassati(Sala sala);
+    @Query("SELECT s FROM Spettacolo s WHERE  (s.dataFine > CURRENT_DATE or (s.dataFine = CURRENT_DATE and s.oraFine >= CURRENT_TIME))  and s.acquistabile=true and s.id = :id")
+    Spettacolo findSpettacoloAcquistabileById(@Param("id") int id);
+    @Query("SELECT s FROM Spettacolo s WHERE (s.dataFine > CURRENT_DATE or (s.dataFine = CURRENT_DATE and s.oraFine >= CURRENT_TIME)) and s.sala=:sala and s.acquistabile=true")
+    List<Spettacolo> findBySalaAndAcquistabileTrueAndNonPassati(@Param("sala") Sala sala);
 
     @Query("SELECT s FROM Spettacolo s WHERE s.dataFine >= CURRENT_DATE and s.oraFine>= CURRENT_TIME ")
     List<Spettacolo> findProssimiSpettacoli();
 
     @Lock(LockModeType.OPTIMISTIC)
-    @Query("SELECT s FROM Spettacolo s WHERE  s.dataFine >= CURRENT_DATE and s.oraFine=CURRENT_TIME and s.film = :film ")
-    List<Spettacolo> findProssimiSpettacoliByFilm(Film film);
-
+    @Query("SELECT s FROM Spettacolo s WHERE  ((s.dataFine = CURRENT_DATE and s.oraFine>CURRENT_TIME) or s.dataFine > current_date ) and s.film = :film ")
+    List<Spettacolo> findProssimiSpettacoliByFilm(@Param("film") Film film);
 
 
 }
