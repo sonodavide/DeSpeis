@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.SalaConPostiDto;
 import org.example.despeis.dto.SalaDto;
 import org.example.despeis.services.SalaService;
@@ -27,8 +28,12 @@ public class SalaController {
     public ResponseEntity<?> nuovo(@RequestBody SalaConPostiDto sala){
         try{
             return ResponseEntity.ok(salaService.nuovo(sala));
-        }catch (Exception e){
+        }
+        catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -38,7 +43,7 @@ public class SalaController {
         try{
             return ResponseEntity.ok(salaService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -58,7 +63,7 @@ public class SalaController {
         try{
             return ResponseEntity.ok(salaService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

@@ -1,5 +1,6 @@
 package org.example.despeis.services;
 
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.AttoreMapper;
@@ -51,7 +52,8 @@ public class AttoreService {
         attoreRepository.deleteById(attoreId);
     }
     @Transactional
-    public AttoreDto nuovo(AttoreDto attoreDto){
+    public AttoreDto nuovo(AttoreDto attoreDto) throws BadRequestException {
+        if(attoreDto.getCognome().trim().equals("") || attoreDto.getNome().trim().equals("")) throw new BadRequestException();
         return attoreMapper.toDto(attoreRepository.save(attoreMapper.toEntity(attoreDto)));
     }
 

@@ -1,6 +1,7 @@
 package org.example.despeis.repository;
 
 import jakarta.persistence.LockModeType;
+import org.example.despeis.model.Film;
 import org.example.despeis.model.Sala;
 import org.example.despeis.model.Spettacolo;
 import org.springframework.data.domain.Page;
@@ -32,5 +33,13 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
     List<Spettacolo> findByAcquistabile(boolean b);
 
     Spettacolo findFirstBySalaAndAcquistabileTrue(Sala sala);
+
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE")
+    List<Spettacolo> findProssimiSpettacoli();
+
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE and s.film = :film ")
+    List<Spettacolo> findProssimiSpettacoliByFilm(Film film);
+
+
 
 }

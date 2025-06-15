@@ -24,7 +24,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.getById(authenticationToken));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -34,7 +34,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.getAll());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -44,7 +44,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.getById(userId));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -55,7 +55,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -64,7 +64,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -75,7 +75,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -86,7 +86,7 @@ public class UtenteController {
             utenteService.update(authenticationToken);
             return ResponseEntity.ok().build();
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

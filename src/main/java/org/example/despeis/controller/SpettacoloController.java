@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.NuovoSpettacoloDto;
 import org.example.despeis.dto.SpettacoloDto;
 import org.example.despeis.services.PostiSpettacoloService;
@@ -26,10 +27,10 @@ public class SpettacoloController {
 
     //QUESTO E' QUELLO DEL SITO PER GLI UTENTI NORMALI.
     @PostMapping("/byDate")
-    public ResponseEntity<?> getFilmSpettacoloByDate(@RequestParam("date") String date){
+    public ResponseEntity<?> getFilmSpettacoloAcquistabileByDate(@RequestParam("date") String date){
         LocalDate d = LocalDate.parse(date);
         try{
-            return ResponseEntity.ok(spettacoloService.getFilmSpettacoloByDate(d));
+            return ResponseEntity.ok(spettacoloService.getFilmSpettacoloAcquistabileByDate(d));
         }catch(Exception e){
             return new ResponseEntity<>(e.toString()
                     , HttpStatus.BAD_REQUEST);
@@ -41,9 +42,14 @@ public class SpettacoloController {
 
         try{
             return ResponseEntity.ok(spettacoloService.aggiungiSpettacolo(nuovo));
-        }catch (Exception e){
-            e.printStackTrace();
+        }catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }catch (IllegalStateException e){
+            return ResponseEntity.status(409).build();
+        }
+        catch (Exception e){
+
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -52,7 +58,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.elimina(spettacolo));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -61,7 +67,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(postiSpettacoloService.getBySpettacoloId(spettacoloId));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -82,7 +88,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -93,7 +99,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 

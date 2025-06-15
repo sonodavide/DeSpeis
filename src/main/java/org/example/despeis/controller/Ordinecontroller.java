@@ -26,7 +26,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.getAllByUserPaginated(authenticationToken, pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -37,7 +37,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.getAllByUserPaginated(userId, pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -46,7 +46,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -55,7 +55,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.incassiTotali());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

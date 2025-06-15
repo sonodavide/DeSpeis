@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.RegistaDto;
 import org.example.despeis.services.RegistaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,11 @@ public class RegistaController {
     public ResponseEntity<?> nuovo(@RequestBody RegistaDto registaDto){
         try{
             return ResponseEntity.ok(registaService.nuovo(registaDto));
-        }catch (Exception e){
+        }catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -32,7 +36,7 @@ public class RegistaController {
             registaService.delete(registaDto);
             return ResponseEntity.ok("ok");
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @GetMapping("/cerca")
@@ -40,7 +44,7 @@ public class RegistaController {
         try{
             return ResponseEntity.ok(registaService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -50,7 +54,7 @@ public class RegistaController {
         try{
             return ResponseEntity.ok(registaService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -60,7 +64,7 @@ public class RegistaController {
         try{
             return ResponseEntity.ok(registaService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
     @GetMapping("/getNomeById")
@@ -68,7 +72,7 @@ public class RegistaController {
         try{
             return ResponseEntity.ok(registaService.getNomeById(id));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.example.despeis.controller;
 
 import lombok.Getter;
+import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.FilmDto;
 import org.example.despeis.dto.NuovoFilmDto;
 import org.example.despeis.services.FilmService;
@@ -38,8 +39,14 @@ public class FilmController {
     public ResponseEntity<?> nuovo(@RequestBody FilmDto film){
         try{
             return ResponseEntity.ok(filmService.nuovoFilm(film));
-        }catch (Exception e){
+        }catch (IllegalStateException e){
+                return ResponseEntity.status(409).build();
+        }
+        catch (BadRequestException e){
             return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().build();
         }
     }
     @PreAuthorize("hasRole('admin')")
@@ -48,7 +55,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.elimina(film));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -57,7 +64,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -67,7 +74,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -77,7 +84,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.count());
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -86,7 +93,7 @@ public class FilmController {
         try{
             return ResponseEntity.ok(filmService.cercaTag(tag, id, pageNumber, pageSize));
         }catch (Exception e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
