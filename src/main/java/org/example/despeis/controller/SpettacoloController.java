@@ -58,9 +58,10 @@ public class SpettacoloController {
     }
     @PreAuthorize("hasRole('admin')")
     @PostMapping("elimina")
-    public ResponseEntity<?> elimina(@Validated @RequestBody SpettacoloDto spettacolo){
+    public ResponseEntity<?> elimina(@Validated @RequestBody NuovoSpettacoloDto spettacolo){
         try{
-            return ResponseEntity.ok(spettacoloService.elimina(spettacolo));
+            spettacoloService.elimina(spettacolo);
+            return ResponseEntity.ok().build();
         }catch (Exception e){
 e.printStackTrace();
             return ResponseEntity.internalServerError().build();

@@ -60,4 +60,9 @@ public class TestService {
 
     }
 
+    @Transactional
+    public void testOverlap(Integer salaId, Integer spettacoloId, LocalDate dataInizio, LocalTime oraInizio, LocalDate dataFine, LocalTime oraFine) {
+        List<Integer> spepettacoli = spettacoloRepository.findConflictingSpettacoli(salaId, dataInizio, oraInizio, dataFine, oraFine, spettacoloId);
+        System.out.println(spepettacoli);
+    }
 }

@@ -67,6 +67,7 @@ public class SpettacoloService {
     @Transactional(readOnly = true)
     public List<FilmSpettacoliDto> getFilmSpettacoloAcquistabileByDate(LocalDate date) throws Exception {
         try{
+            if(date.isBefore(LocalDate.now())) throw new BadRequestException();
             List<Spettacolo> spettacoli = spettacoloRepository.findAllByDataAndAcquistabileOrderByFilmTitoloAscOraAsc(date, true);
 
 
@@ -136,7 +137,7 @@ public class SpettacoloService {
                 //se è finito, impedisco la modifica
                 if(LocalDateTime.of(s.getDataFine(), s.getOraFine()).isBefore(LocalDateTime.now())) throw new BadRequestException();
                 iniziato = LocalDateTime.now().isAfter(LocalDateTime.of(s.getData(), s.getOra())) && LocalDateTime.now().isBefore(LocalDateTime.of(s.getDataFine(), s.getOraFine()));
-
+                if(iniziato && !s.getOra().equals(nuovoSpettacolo.getOra()) || !s.getData().equals(nuovoSpettacolo.getData())) throw new BadRequestException();
 
 
             }
@@ -155,14 +156,14 @@ public class SpettacoloService {
                 Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
                 LocalDateTime inizio = LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra());
                 LocalDateTime fine = inizio.plus(durata);
-
+                int tempId = s.getId() == null ? -1 : s.getId();
                 spettacoliProblematici = spettacoloRepository.findConflictingSpettacoli(
                         nuovoSpettacolo.getSala().getId(),
                         nuovoSpettacolo.getData(),
                         nuovoSpettacolo.getOra(),
                         fine.toLocalDate(),
                         fine.toLocalTime(),
-                        s.getId());
+                        tempId);
                 if(!spettacoliProblematici.isEmpty()){
                     System.out.println("sala occupata a quell'ora");
                     throw new IllegalStateException("La sala è occupata in quell'orario.");
@@ -218,12 +219,20 @@ public class SpettacoloService {
     }
 
     @Transactional
-    public SpettacoloDto elimina(SpettacoloDto spettacolo) throws Exception {
+    public void elimina(NuovoSpettacoloDto spettacolo) throws Exception {
+        Spettacolo s = entityManager.find(Spettacolo.class, spettacolo.getId(), LockModeType.OPTIMISTIC);
+        //se è finito o in corso, impedisco l'eliminazione
+        if(LocalDateTime.of(s.getDataFine(), s.getOraFine()).isBefore(LocalDateTime.now())) throw new BadRequestException();
+        if(LocalDateTime.now().isAfter(LocalDateTime.of(s.getData(), s.getOra())) && LocalDateTime.now().isBefore(LocalDateTime.of(s.getDataFine(), s.getOraFine()))) throw new BadRequestException();
+        //impedisco la modifica della sala nel caso in cui ci sono già posti prenotati
+        List<Postispettacolo> postiEsistenti = postispettacoloRepository.findBySpettacoloId(s.getId());
+        for(Postispettacolo p : postiEsistenti)
+            if(p.getStato().equals("prenotato")) throw new IllegalStateException("impossibile effettuare modifiche. Ci sta gente prenotata");
         spettacoloRepository.deleteById(spettacolo.getId());
         if(entityManager.find(Spettacolo.class, spettacolo.getId())!=null){
             throw new Exception();
         }
-        return spettacolo;
+
     }
 
 
