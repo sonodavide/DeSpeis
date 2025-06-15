@@ -28,7 +28,7 @@ public class PostiSpettacoloService {
     private final UtenteRepository utenteRepository;
     private final OrdineRepository ordineRepository;
     private final BigliettoRepository bigliettoRepository;
-    private final SpettacoloService spettacoloService;
+
     private final SpettacoloRepository spettacoloRepository;
 
     @Autowired
@@ -38,23 +38,23 @@ public class PostiSpettacoloService {
         this.utenteRepository = utenteRepository;
         this.ordineRepository = ordineRepository;
         this.bigliettoRepository = bigliettoRepository;
-        this.spettacoloService = spettacoloService;
+
         this.spettacoloRepository = spettacoloRepository;
     }
 
     @Transactional(readOnly = true)
     public PostiSpettacoloResponseDto getBySpettacoloId(int spettacoloId){
-       List<Postispettacolo> postiSpettacolo = postiSpettacoloRepository.findAllBySpettacoloIdOrderByPostoFilaAscPostoSedileAsc(spettacoloId);
+        List<Postispettacolo> postiSpettacolo = postiSpettacoloRepository.findAllBySpettacoloIdOrderByPostoFilaAscPostoSedileAsc(spettacoloId);
         HashMap<String, List<PostiSpettacoloResponseDto.PostoResponse>> tempMap = new HashMap<>();
-       for(Postispettacolo posto : postiSpettacolo){
-           String filaCorrente = posto.getPosto().getFila();
-           if(!tempMap.containsKey(filaCorrente)){
+        for(Postispettacolo posto : postiSpettacolo){
+            String filaCorrente = posto.getPosto().getFila();
+            if(!tempMap.containsKey(filaCorrente)){
                 tempMap.put(filaCorrente, new ArrayList<>());
-           }
-           tempMap.get(filaCorrente).add(
-                   new PostiSpettacoloResponseDto.PostoResponse(
-                           posto.getId(), posto.getPosto().getId(), posto.getStato()
-           ));
+            }
+            tempMap.get(filaCorrente).add(
+                    new PostiSpettacoloResponseDto.PostoResponse(
+                            posto.getId(), posto.getPosto().getId(), posto.getStato()
+                    ));
        }
        return new PostiSpettacoloResponseDto(spettacoloId, tempMap);
     }
@@ -87,7 +87,7 @@ public class PostiSpettacoloService {
 
             ordine = ordineRepository.save(ordine);
             for(Postispettacolo posto : p){
-                posto.setStato("occupato");
+                posto.setStato("prenotato");
                 Biglietto biglietto = new Biglietto();
                 biglietto.setPostospettacolo(posto);
                 biglietto.setUtente(utente);

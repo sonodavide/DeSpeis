@@ -14,6 +14,7 @@ import java.util.List;
 public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer> {
 
     public List<Spettacolo> findAllByDataOrderByFilmTitoloAscOraAsc(LocalDate data);
+    public List<Spettacolo> findAllByDataAndAcquistabileOrderByFilmTitoloAscOraAsc(LocalDate data, Boolean acquistabile);
     @Lock(LockModeType.PESSIMISTIC_READ) // Aggiunge un lock pessimistico in lettura
     @Query("SELECT s.id FROM Spettacolo s WHERE s.sala.id = :sala AND s.data = :data AND " +
             "((:oraInizio BETWEEN s.ora AND s.oraFine) OR " +
@@ -25,4 +26,6 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
                                                @Param("oraFine") LocalTime oraFine);
 
     List<Spettacolo> findByAcquistabile(boolean b);
+
+
 }

@@ -12,7 +12,7 @@ public class PostiSpettacoloResponseDto implements Serializable {
     Map<String, List<PostoResponse>> posti;
 
     @Value
-    public static class PostoResponse{
+    public static class PostoResponse implements Serializable{
         Integer postoId;
         Integer postoSedileId;
         String stato;

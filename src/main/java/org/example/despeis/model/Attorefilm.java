@@ -17,9 +17,6 @@ public class Attorefilm {
     @JoinColumn(name = "film", nullable = false)
     private Film film;
 
-    @MapsId("attore")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "attore", nullable = false)
-    private Attore attore;
+
 
 }

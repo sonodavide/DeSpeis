@@ -1,12 +1,10 @@
 package org.example.despeis.controller;
 
+import org.example.despeis.dto.UtenteDto;
 import org.example.despeis.services.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/utente")
@@ -27,5 +25,33 @@ public class UtenteController {
             return ResponseEntity.badRequest().build();
         }
 
+    }
+
+    @GetMapping("/cerca")
+    public ResponseEntity<?> cerca(@RequestParam String query) {
+        try{
+            return ResponseEntity.ok(utenteService.ricerca(query));
+        }catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/nuovo")
+    public ResponseEntity<?> nuovo(@RequestBody UtenteDto utenteDto){
+        try{
+            return ResponseEntity.ok(utenteService.nuovo(utenteDto));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/elimina")
+    public ResponseEntity<?> elimina(@RequestBody UtenteDto utenteDto){
+        try{
+            utenteService.delete(utenteDto);
+            return ResponseEntity.ok("ok");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

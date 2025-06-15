@@ -2,41 +2,49 @@ package org.example.despeis.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
 import org.example.despeis.dto.FilmDto;
-import org.example.despeis.dto.NuovoFilmDto;
+import org.example.despeis.mapper.AttoreMapper;
 import org.example.despeis.mapper.FilmMapper;
-import org.example.despeis.model.Attore;
-import org.example.despeis.model.Film;
-import org.example.despeis.model.Genere;
-import org.example.despeis.model.Regista;
-import org.example.despeis.repository.AttoreRepository;
-import org.example.despeis.repository.FilmRepository;
-import org.example.despeis.repository.GenereRepository;
-import org.example.despeis.repository.RegistaRepository;
+import org.example.despeis.mapper.GenereMapper;
+import org.example.despeis.mapper.RegistaMapper;
+import org.example.despeis.model.*;
+import org.example.despeis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
-
+    @PersistenceContext
     private EntityManager entityManager;
     private final FilmRepository filmRepository;
     private final FilmMapper filmMapper;
-    private final AttoreRepository attoreRepository;
-    private final RegistaRepository registaRepository;
-    private final GenereRepository genereRepository;
+    private final AttoreMapper attoreMapper;
+    private final RegistaMapper registaMapper;
+    private final GenereMapper genereMapper;
+    private final GenerefilmRepository generefilmRepository;
+    private final RegiafilmRepository regiafilmRepository;
+    private final AttorefilmRepository attorefilmRepository;
+
     @Autowired
-    public FilmService(FilmRepository filmRepository, FilmMapper filmMapper, AttoreRepository attoreRepository, RegistaRepository registaRepository, GenereRepository genereRepository) {
+    public FilmService(FilmRepository filmRepository, FilmMapper filmMapper, AttoreMapper attoreMapper, RegistaMapper registaMapper, GenereMapper genereMapper, GenerefilmRepository generefilmRepository, RegiafilmRepository regiafilmRepository, AttorefilmRepository attorefilmRepository) {
         this.filmRepository = filmRepository;
         this.filmMapper = filmMapper;
-        this.attoreRepository = attoreRepository;
-        this.registaRepository = registaRepository;
-        this.genereRepository = genereRepository;
+        this.attoreMapper = attoreMapper;
+        this.registaMapper = registaMapper;
+        this.genereMapper = genereMapper;
+        this.generefilmRepository = generefilmRepository;
+        this.regiafilmRepository = regiafilmRepository;
+        this.attorefilmRepository = attorefilmRepository;
     }
 
     @Transactional(readOnly = true)
@@ -58,23 +66,74 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
     @Transactional
-    public FilmDto nuovoFilm(NuovoFilmDto nuovoFilm){
-        Film film;
-        if(nuovoFilm.getId()==null){
-            film = new Film();
-        } else{
-            film = entityManager.find(Film.class, nuovoFilm.getId(), LockModeType.OPTIMISTIC);
+    public FilmDto nuovoFilm(FilmDto nuovoFilm){
+        try{
+            Film film;
+            if(nuovoFilm.getId()==null){
+                film = new Film();
+            } else{
+                film = entityManager.find(Film.class, nuovoFilm.getId(), LockModeType.PESSIMISTIC_WRITE);
 
+            }
+            film.setDatauscita(nuovoFilm.getDatauscita());
+            film.setTitolo(nuovoFilm.getTitolo());
+            film.setDurata(nuovoFilm.getDurata());
+            film.setTrama(nuovoFilm.getTrama());
+            film.setImg(nuovoFilm.getImg());
+            Film f = filmRepository.save(film);
+
+            Set<Genere> generi = nuovoFilm.getGeneres().stream().map(genereMapper::toEntity).collect(Collectors.toSet());
+            for(Genere genere : generi){
+                Generefilm genereFilm = new Generefilm();
+                GenerefilmId genereFilmId = new GenerefilmId();
+                genereFilmId.setFilm(f.getId());
+                genereFilmId.setGenere(genere.getId());
+                genereFilm.setId(genereFilmId);
+                genereFilm.setFilm(film);
+                generefilmRepository.save(genereFilm);
+            }
+            Set<Attore> attori = nuovoFilm.getAttores().stream().map(attoreMapper::toEntity).collect(Collectors.toSet());
+            for(Attore attore : attori){
+                Attorefilm attorefilm = new Attorefilm();
+                AttorefilmId attorefilmId = new AttorefilmId();
+                attorefilmId.setFilm(film.getId());
+                attorefilmId.setAttore(attore.getId());
+                attorefilm.setId(attorefilmId);
+                attorefilm.setFilm(film);
+                attorefilmRepository.save(attorefilm);
+            }
+            Set<Regista> registi = nuovoFilm.getRegistas().stream().map(registaMapper::toEntity).collect(Collectors.toSet());
+            for(Regista regista : registi){
+                Regiafilm regiafilm = new Regiafilm();
+                RegiafilmId regiafilmId = new RegiafilmId();
+                regiafilmId.setFilm(film.getId());
+                regiafilmId.setRegista(regista.getId());
+                regiafilm.setId(regiafilmId);
+                regiafilm.setFilm(film);
+                regiafilmRepository.save(regiafilm);
+            }
+            return filmMapper.toDto(f);
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
         }
-        film.setDatauscita(nuovoFilm.getDatauscita());
-        film.setTitolo(nuovoFilm.getTitolo());
-        film.setDurata(nuovoFilm.getDurata());
-        film.setGeneres(genereRepository.findByIds(nuovoFilm.getGenere()));
-        film.setAttores(attoreRepository.findByIds(nuovoFilm.getAttore()));
-        film.setRegistas(registaRepository.findByIds(nuovoFilm.getRegista()));
-        Film f = filmRepository.save(film);
-        return filmMapper.toDto(f);
+
 
 
     }
+    @Transactional
+    public FilmDto elimina(FilmDto film){
+        filmRepository.delete(filmMapper.toEntity(film));
+        return film;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FilmDto> ricerca(String query){
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("titolo"));
+        String searchTerm = query.toLowerCase() + "%";
+        Page<Film> result = filmRepository.cerca(searchTerm, pageable);
+
+        return result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList());
+    }
+
 }
