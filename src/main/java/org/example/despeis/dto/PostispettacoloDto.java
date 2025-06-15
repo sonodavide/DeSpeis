@@ -10,7 +10,9 @@ import java.io.Serializable;
 @Value
 public class PostispettacoloDto implements Serializable {
     Integer id;
-    PostoDto posto;
+    Integer sedile;
     String stato;
-    Integer spettacoloId;
+    String fila;
+
+
 }

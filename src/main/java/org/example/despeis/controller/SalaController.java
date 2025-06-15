@@ -1,7 +1,6 @@
 package org.example.despeis.controller;
 
-import org.example.despeis.dto.PostoDto;
-import org.example.despeis.dto.SalaConPostiPerFilaDto;
+import org.example.despeis.dto.SalaConPostiDto;
 import org.example.despeis.dto.SalaDto;
 import org.example.despeis.services.SalaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ public class SalaController {
     }
 
     @PostMapping("/nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody  SalaDto sala){
+    public ResponseEntity<?> nuovo(@RequestBody SalaConPostiDto sala){
         try{
             return ResponseEntity.ok(salaService.nuovo(sala));
         }catch (Exception e){
@@ -42,9 +41,15 @@ public class SalaController {
         }
     }
 
-    @PostMapping("/postiPerFila")
-    public ResponseEntity<?> getPostiPerFila(@RequestBody SalaDto sala){
-        return ResponseEntity.ok(salaService.getSalaConPostiPerFila(sala));
+    @GetMapping("/postiPerFila")
+    public ResponseEntity<?> getPostiPerFila(@RequestParam Integer salaId){
+        return ResponseEntity.ok(salaService.getSalaConPostiPerFila(salaId));
+    }
+
+    @PostMapping("/elimina")
+    public ResponseEntity<?> elimina(@RequestBody SalaDto sala){
+        System.out.println(sala.getId());
+        return ResponseEntity.ok(salaService.delete(sala));
     }
 
 }

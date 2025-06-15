@@ -15,9 +15,8 @@ public class Postispettacolo {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "posto", nullable = false)
-    private Posto posto;
+    @Column(name = "sedile", nullable = false)
+    private Integer sedile;
 
     @Column(name = "stato", nullable = false, length = Integer.MAX_VALUE)
     private String stato;
@@ -25,5 +24,8 @@ public class Postispettacolo {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "spettacolo", nullable = false)
     private Spettacolo spettacolo;
+
+    @Column(name = "fila", nullable = false, length = Integer.MAX_VALUE)
+    private String fila;
 
 }

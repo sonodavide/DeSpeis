@@ -1,6 +1,7 @@
 package org.example.despeis.repository;
 
 import jakarta.persistence.LockModeType;
+import org.example.despeis.model.Sala;
 import org.example.despeis.model.Spettacolo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,5 +30,6 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
 
     List<Spettacolo> findByAcquistabile(boolean b);
 
+    Spettacolo findFirstBySalaAndAcquistabileTrue(Sala sala);
 
 }

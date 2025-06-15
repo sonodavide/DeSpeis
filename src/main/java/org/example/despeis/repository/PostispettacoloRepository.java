@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 public interface PostispettacoloRepository extends JpaRepository<Postispettacolo, Integer> {
-    public List<Postispettacolo> findAllBySpettacoloIdOrderByPostoFilaAscPostoSedileAsc(int spettacolo);
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    public Postispettacolo findByPostoIdAndSpettacoloId(int postoId, int spettacoloId);
+    public List<Postispettacolo> findAllBySpettacoloIdOrderByFilaAscSedileAsc(int spettacolo);
+
     @Lock(LockModeType.PESSIMISTIC_READ)
     public List<Postispettacolo> findBySpettacoloIdAndStato(int spettacoloId, String stato);
     public List<Postispettacolo> deleteBySpettacoloId(int spettacoloId);
@@ -21,5 +20,8 @@ public interface PostispettacoloRepository extends JpaRepository<Postispettacolo
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Postispettacolo p WHERE p.id IN :postiIds AND p.stato ='libero' ")
     public List<Postispettacolo> findByPostiIdsAndLiberi(@Param("postiIds") Set<Integer> postiIds);
+
+
+
 
 }

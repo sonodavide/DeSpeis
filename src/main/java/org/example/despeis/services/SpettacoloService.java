@@ -32,28 +32,26 @@ public class SpettacoloService {
     private final FilmRepository filmRepository;
     private final SalaRepository salaRepository;
     private final PostispettacoloRepository postispettacoloRepository;
-    private final PostoRepository postoRepository;
-    private final PostispettacoloMapper postispettacoloMapper;
+
     private final SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper;
     private final FilmMapper filmMapper;
     private final NuovoSpettacoloMapper nuovoSpettacoloMapper;
-    private final PostoMapper postoMapper;
+    private final PostiMapper postiMapper;
     private final SalaMapper salaMapper;
 
 
     @Autowired
-    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostoRepository postoRepository, PostispettacoloMapper postispettacoloMapper, SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper, FilmMapper filmMapper, NuovoSpettacoloMapper nuovoSpettacoloMapper, PostoMapper postoMapper, SalaMapper salaMapper) {
+    public SpettacoloService(SpettacoloRepository spettacoloRepository, SpettacoloMapper spettacoloMapper, FilmRepository filmRepository, SalaRepository salaRepository, PostispettacoloRepository postispettacoloRepository, PostispettacoloMapper postispettacoloMapper, SpettacoloSenzaFilmMapper spettacoloSenzaFilmMapper, FilmMapper filmMapper, NuovoSpettacoloMapper nuovoSpettacoloMapper, PostiMapper postiMapper, SalaMapper salaMapper) {
         this.spettacoloRepository = spettacoloRepository;
         this.spettacoloMapper = spettacoloMapper;
         this.filmRepository = filmRepository;
         this.salaRepository = salaRepository;
         this.postispettacoloRepository = postispettacoloRepository;
-        this.postoRepository = postoRepository;
-        this.postispettacoloMapper = postispettacoloMapper;
+
         this.spettacoloSenzaFilmMapper = spettacoloSenzaFilmMapper;
         this.filmMapper = filmMapper;
         this.nuovoSpettacoloMapper =  nuovoSpettacoloMapper;
-        this.postoMapper = postoMapper;
+        this.postiMapper = postiMapper;
         this.salaMapper = salaMapper;
     }
 
@@ -159,14 +157,17 @@ public class SpettacoloService {
                 if(s.getSala() == null || !s.getSala().equals(nuovaSala)) {
                     postispettacoloRepository.deleteBySpettacoloId(s.getId());
                     s.setSala(nuovaSala);
-                    List<Posto> postiSala = nuovoSpettacolo.getSala().getPostos().stream().map(postoMapper::toEntity).collect(Collectors.toList());
 
-                    for (Posto p : postiSala) {
+                    for (Posti p : nuovaSala.getPostis()) {
+                        for(int i=1;i<=p.getSedili();i++){
                         Postispettacolo ps = new Postispettacolo();
-                        ps.setStato("l");
-                        ps.setPosto(p);
+                        ps.setStato("libero");
+                        ps.setSedile(i);
+                        ps.setFila(p.getFila());
                         ps.setSpettacolo(s);
                         psList.add(ps);
+
+                        }
                     }
 
                 }
@@ -194,17 +195,17 @@ public class SpettacoloService {
 
 
     @Transactional(readOnly = true)
-    public PostiSpettacoloResponseDto getBySpettacoloId(int spettacoloId){
-        List<Postispettacolo> postiSpettacolo = postispettacoloRepository.findAllBySpettacoloIdOrderByPostoFilaAscPostoSedileAsc(spettacoloId);
+    public PostiSpettacoloResponseDto getPostiSpettacoloBySpettacoloId(int spettacoloId){
+        List<Postispettacolo> postiSpettacolo = postispettacoloRepository.findAllBySpettacoloIdOrderByFilaAscSedileAsc(spettacoloId);
         HashMap<String, List<PostiSpettacoloResponseDto.PostoResponse>> tempMap = new HashMap<>();
         for(Postispettacolo posto : postiSpettacolo){
-            String filaCorrente = posto.getPosto().getFila();
+            String filaCorrente = posto.getFila();
             if(!tempMap.containsKey(filaCorrente)){
                 tempMap.put(filaCorrente, new ArrayList<>());
             }
             tempMap.get(filaCorrente).add(
                     new PostiSpettacoloResponseDto.PostoResponse(
-                            posto.getId(), posto.getPosto().getId(), posto.getStato()
+                            posto.getId(), posto.getSedile(), posto.getStato()
                     ));
         }
         return new PostiSpettacoloResponseDto(spettacoloId, tempMap);

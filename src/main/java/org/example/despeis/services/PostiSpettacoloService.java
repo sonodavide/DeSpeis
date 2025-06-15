@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class PostiSpettacoloService {
@@ -44,16 +43,16 @@ public class PostiSpettacoloService {
 
     @Transactional(readOnly = true)
     public PostiSpettacoloResponseDto getBySpettacoloId(int spettacoloId){
-        List<Postispettacolo> postiSpettacolo = postiSpettacoloRepository.findAllBySpettacoloIdOrderByPostoFilaAscPostoSedileAsc(spettacoloId);
+        List<Postispettacolo> postiSpettacolo = postiSpettacoloRepository.findAllBySpettacoloIdOrderByFilaAscSedileAsc(spettacoloId);
         HashMap<String, List<PostiSpettacoloResponseDto.PostoResponse>> tempMap = new HashMap<>();
         for(Postispettacolo posto : postiSpettacolo){
-            String filaCorrente = posto.getPosto().getFila();
+            String filaCorrente = posto.getFila();
             if(!tempMap.containsKey(filaCorrente)){
                 tempMap.put(filaCorrente, new ArrayList<>());
             }
             tempMap.get(filaCorrente).add(
                     new PostiSpettacoloResponseDto.PostoResponse(
-                            posto.getId(), posto.getPosto().getId(), posto.getStato()
+                            posto.getId(), posto.getSedile(), posto.getStato()
                     ));
        }
        return new PostiSpettacoloResponseDto(spettacoloId, tempMap);
