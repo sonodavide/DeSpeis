@@ -1,10 +1,11 @@
 package org.example.despeis.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -12,10 +13,8 @@ import java.time.LocalDate;
 @Table(name = "utente")
 public class Utente {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utente_id_gen")
-    @SequenceGenerator(name = "utente_id_gen", sequenceName = "utente_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+    @Column(name = "id", nullable = false, length = Integer.MAX_VALUE)
+    private String id;
 
     @Column(name = "username", nullable = false, length = Integer.MAX_VALUE)
     private String username;
@@ -26,10 +25,7 @@ public class Utente {
     @Column(name = "cognome", nullable = false, length = Integer.MAX_VALUE)
     private String cognome;
 
-    @Column(name = "datanascita", nullable = false)
-    private LocalDate datanascita;
-
-    @Column(name = "telefono", nullable = false, length = Integer.MAX_VALUE)
-    private String telefono;
+    @Column(name = "email", nullable = false, length = Integer.MAX_VALUE)
+    private String email;
 
 }

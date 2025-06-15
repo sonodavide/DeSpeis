@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface UtenteRepository extends JpaRepository<Utente, Integer> {
+public interface UtenteRepository extends JpaRepository<Utente, String> {
     @Query(value = "SELECT u FROM Utente u WHERE " +
             "CONCAT(u.nome, ' ', u.cognome) ILIKE :searchTerm OR " +
             "CONCAT(u.cognome, ' ', u.nome) ILIKE :searchTerm"

@@ -6,6 +6,7 @@ import org.example.despeis.dto.NuovoFilmDto;
 import org.example.despeis.services.FilmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,7 +33,7 @@ public class FilmController {
 
 
 
-
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("/nuovo")
     public ResponseEntity<?> nuovo(@RequestBody FilmDto film){
         try{
@@ -41,7 +42,7 @@ public class FilmController {
             return ResponseEntity.badRequest().build();
         }
     }
-
+    @PreAuthorize("hasRole('admin')")
     @PostMapping("/elimina")
     public ResponseEntity<?> elimina(@RequestBody FilmDto film){
         try{
@@ -52,7 +53,7 @@ public class FilmController {
     }
 
     @GetMapping("/cerca")
-    public ResponseEntity<?> suggest(@RequestParam String query, Integer pageNumber, Integer pageSize) {
+    public ResponseEntity<?> suggest(@RequestParam String query, @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize) {
         try{
             return ResponseEntity.ok(filmService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
@@ -61,7 +62,7 @@ public class FilmController {
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+    public ResponseEntity<?> getAllPaged(@RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
 
         try{
             return ResponseEntity.ok(filmService.getAllPaginated(pageNumber, pageSize));
@@ -70,6 +71,7 @@ public class FilmController {
         }
     }
 
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/count")
     public ResponseEntity<?> count(){
         try{

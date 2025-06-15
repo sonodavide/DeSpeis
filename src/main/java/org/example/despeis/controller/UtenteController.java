@@ -4,6 +4,8 @@ import org.example.despeis.dto.UtenteDto;
 import org.example.despeis.services.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,20 +17,40 @@ public class UtenteController {
     public UtenteController(UtenteService utenteService) {
         this.utenteService = utenteService;
     }
-
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
-    public ResponseEntity<?> getUtente(@RequestParam(name = "userId", required = false) Integer userId){
+    public ResponseEntity<?> getUtente(JwtAuthenticationToken authenticationToken){
 
         try{
-            return userId == null ? ResponseEntity.ok(utenteService.getAll()) : ResponseEntity.ok(utenteService.getById(userId));
+            return ResponseEntity.ok(utenteService.getById(authenticationToken));
         }catch (Exception e){
             return ResponseEntity.badRequest().build();
         }
-
     }
 
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll(){
+        try{
+            return ResponseEntity.ok(utenteService.getAll());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/userId")
+    public ResponseEntity<?> getByUserId(String userId){
+        try{
+            return ResponseEntity.ok(utenteService.getById(userId));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/paged")
-    public ResponseEntity<?> getAllPaged(@RequestParam Integer pageNumber, Integer pageSize){
+    public ResponseEntity<?> getAllPaged(@RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
 
         try{
             return ResponseEntity.ok(utenteService.getAllPaginated(pageNumber, pageSize));
@@ -36,8 +58,9 @@ public class UtenteController {
             return ResponseEntity.badRequest().build();
         }
     }
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/cerca")
-    public ResponseEntity<?> ricerca(@RequestParam String query, Integer pageNumber, Integer pageSize) {
+    public ResponseEntity<?> ricerca(@RequestParam String query, @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize) {
         try{
             return ResponseEntity.ok(utenteService.ricerca(query, pageNumber, pageSize));
         }catch (Exception e) {
@@ -45,25 +68,8 @@ public class UtenteController {
         }
     }
 
-    @PostMapping("/nuovo")
-    public ResponseEntity<?> nuovo(@RequestBody UtenteDto utenteDto){
-        try{
-            return ResponseEntity.ok(utenteService.nuovo(utenteDto));
-        }catch (Exception e){
-            return ResponseEntity.badRequest().build();
-        }
-    }
 
-    @PostMapping("/elimina")
-    public ResponseEntity<?> elimina(@RequestBody UtenteDto utenteDto){
-        try{
-            utenteService.delete(utenteDto);
-            return ResponseEntity.ok("ok");
-        }catch (Exception e){
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
+    @PreAuthorize("hasRole('admin')")
     @GetMapping("/count")
     public ResponseEntity<?> count(){
         try{

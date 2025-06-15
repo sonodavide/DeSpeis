@@ -5,11 +5,13 @@ import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.OrdineMapper;
 import org.example.despeis.model.Ordine;
 import org.example.despeis.repository.OrdineRepository;
+import org.example.despeis.security.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,13 +42,18 @@ public class OrdineService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<OrdineDto> getAllByUserPaginated(int userId, int pageNumber, int pageSize) {
+    public PaginatedResponse<OrdineDto> getAllByUserPaginated(String userId, int pageNumber, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("data").descending());
         Page<Ordine> result = ordineRepository.findAllByUtenteId(userId, pageable);
         return new PaginatedResponse<OrdineDto>(result.getContent().stream()
                 .map(ordineMapper::toDto)
                 .collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<OrdineDto> getAllByUserPaginated(JwtAuthenticationToken authenticationToken, int pageNumber, int pageSize){
+        return getAllByUserPaginated(Utils.getUserId(authenticationToken), pageNumber, pageSize);
     }
 
     @Transactional(readOnly = true)

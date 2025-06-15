@@ -8,7 +8,9 @@ import org.example.despeis.dto.PrenotazioneRequestDto;
 import org.example.despeis.mapper.PostispettacoloMapper;
 import org.example.despeis.model.*;
 import org.example.despeis.repository.*;
+import org.example.despeis.security.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,9 +79,9 @@ public class PostiSpettacoloService {
         return getBySpettacoloId(p.get(0).getSpettacolo().getId());
     }
     @Transactional
-    public boolean prenota(PrenotazioneRequestDto prenotazione) throws Exception{
+    public boolean prenota(JwtAuthenticationToken authenticationToken, PrenotazioneRequestDto prenotazione) throws Exception{
         try{
-
+        String userId = Utils.getUserId(authenticationToken);
         Spettacolo spettacolo =entityManager.find(Spettacolo.class, prenotazione.getSpettacoloId(), LockModeType.PESSIMISTIC_READ);
         if(!spettacolo.getAcquistabile()) throw new Exception("non è acquistabile");
         List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(prenotazione.getPostiIds());
@@ -90,7 +92,7 @@ public class PostiSpettacoloService {
             Ordine ordine = new Ordine();
             ordine.setData(LocalDate.now());
             ordine.setStato("confermato");
-            Utente utente = utenteRepository.findById(prenotazione.getUserId()).orElseThrow();
+            Utente utente = utenteRepository.findById(userId).orElseThrow();
 
             ordine = ordineRepository.save(ordine);
             for(Postispettacolo posto : p){

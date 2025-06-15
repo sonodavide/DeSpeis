@@ -7,11 +7,13 @@ import org.example.despeis.mapper.BigliettoMapper;
 import org.example.despeis.model.Biglietto;
 import org.example.despeis.model.Ordine;
 import org.example.despeis.repository.BigliettoRepository;
+import org.example.despeis.security.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
 public class BigliettoService {
     private final BigliettoRepository bigliettoRepository;
     private final BigliettoMapper bigliettoMapper;
-    private final int pageSize=10;
+
     @Autowired
     public BigliettoService(BigliettoRepository bigliettoRepository, BigliettoMapper bigliettoMapper) {
         this.bigliettoRepository = bigliettoRepository;
@@ -31,39 +33,57 @@ public class BigliettoService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<BigliettoDto> getAll(int page){
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("id").descending());
+    public PaginatedResponse<BigliettoDto> getAll(int pageNumber, int pageSize){
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
         Page<Biglietto> result = bigliettoRepository.findAll(pageable);
         return new PaginatedResponse<BigliettoDto>(result.getContent().stream()
                 .map(bigliettoMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<BigliettoDto> getByUser(Integer userId, int page){
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("id").descending());
+    public PaginatedResponse<BigliettoDto> getByUser(JwtAuthenticationToken authenticationToken, int pageNumber, int pageSize){
+        String userId = Utils.getUserId(authenticationToken);
+        return getByUser(userId, pageNumber, pageSize);
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<BigliettoDto> getByUser(String userId, int pageNumber, int pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
         Page<Biglietto> result = bigliettoRepository.findByUtenteId(userId, pageable);
         return new PaginatedResponse<BigliettoDto>(result.getContent().stream()
                 .map(bigliettoMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 
     @Transactional(readOnly = true)
-    public List<BigliettoDto> getByUserAndDate(Integer userId, LocalDate date){
-        return bigliettoRepository.findByUtenteIdAndPostospettacoloSpettacoloData(userId, date).stream()
-                .map(bigliettoMapper::toDto).collect(Collectors.toList());
+    public PaginatedResponse<BigliettoDto> getByUserAndDate(JwtAuthenticationToken authenticationToken, LocalDate date, int pageNumber, int pageSize){
+        String userId = Utils.getUserId(authenticationToken);
+        return getByUserAndDate(userId, date, pageNumber, pageSize);
     }
 
     @Transactional(readOnly = true)
-    public List<BigliettoDto> getByDate(LocalDate date){
-        return bigliettoRepository.findByPostospettacoloSpettacoloData(date).stream()
-                .map(bigliettoMapper::toDto).collect(Collectors.toList());
+    public PaginatedResponse<BigliettoDto> getByDate(LocalDate date, int pageNumber, int pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("ordine.data").descending());
+        Page<Biglietto> result = bigliettoRepository.findByPostospettacoloSpettacoloData(date, pageable);
+        return new PaginatedResponse<BigliettoDto>(result.getContent().stream()
+                .map(bigliettoMapper::toDto)
+                .collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<BigliettoDto> getAllByUserPaginated(int userId, int pageNumber, int pageSize) {
-
+    public PaginatedResponse<BigliettoDto> getAllByUserId(String userId, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("ordine.data").descending());
         Page<Biglietto> result = bigliettoRepository.findAllByUtenteId(userId, pageable);
+        return new PaginatedResponse<BigliettoDto>(result.getContent().stream()
+                .map(bigliettoMapper::toDto)
+                .collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<BigliettoDto> getByUserAndDate(String userId, LocalDate date, int pageNumber, int pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("ordine.data").descending());
+        Page<Biglietto> result = bigliettoRepository.findByUtenteIdAndPostospettacoloSpettacoloData(userId, date, pageable);
         return new PaginatedResponse<BigliettoDto>(result.getContent().stream()
                 .map(bigliettoMapper::toDto)
                 .collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());

@@ -7,12 +7,22 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class Utils {
 
-    public static String getEmail() {
-        JwtAuthenticationToken authenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authenticationToken.getCredentials();
-        String email = (String) jwt.getClaims().get("email");
-        return email;
+    public static String getUserId(JwtAuthenticationToken jwtToken) {
+        return jwtToken.getToken().getSubject();
     }
+
+    public static String getEmail(JwtAuthenticationToken jwtToken) {
+        return jwtToken.getToken().getClaimAsString("email");
+    }
+
+    public static String getFirstName(JwtAuthenticationToken jwtToken) {
+        return jwtToken.getToken().getClaimAsString("given_name");
+    }
+
+    public static String getLastName(JwtAuthenticationToken jwtToken) {
+        return jwtToken.getToken().getClaimAsString("family_name");
+    }
+
 
 
 }

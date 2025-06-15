@@ -11,7 +11,7 @@ import java.util.List;
 public interface OrdineRepository extends JpaRepository<Ordine, Integer> {
 
     Page<Ordine> findAll(Pageable pageable);
-    Page<Ordine> findAllByUtenteId(Integer userId, Pageable pageable);
+    Page<Ordine> findAllByUtenteId(String userId, Pageable pageable);
     @Query("SELECT SUM(o.totale) FROM Ordine o")
     Double sumAllTotale();
 }
