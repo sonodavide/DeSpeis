@@ -246,4 +246,11 @@ public class SpettacoloService {
         if(spettacolo==null) throw new Exception();
         return spettacoloSenzaFilmMapper.toDto(spettacolo);
     }
+
+    @Transactional(readOnly = true)
+    public SpettacoloSenzaFilmDto getSenzaFilmById(int id) throws Exception {
+        Spettacolo spettacolo = spettacoloRepository.findById(id).orElseThrow(() -> new Exception());
+        if(spettacolo==null) throw new Exception();
+        return spettacoloSenzaFilmMapper.toDto(spettacolo);
+    }
 }
