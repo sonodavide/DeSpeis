@@ -12,6 +12,7 @@ import org.example.despeis.mapper.SalaMapper;
 import org.example.despeis.model.Film;
 import org.example.despeis.model.Posti;
 
+import org.example.despeis.model.Regista;
 import org.example.despeis.model.Sala;
 import org.example.despeis.repository.PostiRepository;
 
@@ -51,17 +52,20 @@ public class SalaService {
     }
 
     @Transactional
-    public boolean delete(SalaDto salaDto) throws BadRequestException {
+    public boolean delete(SalaDto salaDto) throws Exception {
         return delete(salaDto.getId());
 
     }
     @Transactional
-    public boolean delete(Integer salaId) throws BadRequestException {
+    public boolean delete(Integer salaId) throws Exception {
         Sala s = entityManager.find(Sala.class, salaId);
         if(s == null) throw new BadRequestException();
         if(!spettacoloRepository.findBySalaAndAcquistabileTrueAndNonPassati(s).isEmpty()) throw new IllegalStateException();
         entityManager.createQuery("UPDATE Spettacolo s SET s.sala = null WHERE s.sala.id = :salaId").setParameter("salaId", salaId).executeUpdate();
         salaRepository.deleteById(salaId);
+        if(entityManager.find(Sala.class, salaId)!=null){
+            throw new Exception();
+        }
         return true;
     }
     @Transactional

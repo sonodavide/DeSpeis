@@ -1,11 +1,14 @@
 package org.example.despeis.services;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.dto.GenereDto;
 import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.GenereMapper;
 import org.example.despeis.model.Attore;
+import org.example.despeis.model.Film;
 import org.example.despeis.model.Genere;
 import org.example.despeis.repository.GenereRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +25,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class GenereService {
-
+    @PersistenceContext
+    EntityManager entityManager;
     private final GenereRepository genereRepository;
     private final GenereMapper genereMapper;
     @Autowired
@@ -33,10 +37,16 @@ public class GenereService {
     @Transactional
     public void delete(GenereDto genereDto){
         genereRepository.deleteById(genereDto.getId());
+
+
     }
     @Transactional
-    public void delete(Integer genereId){
+    public void delete(Integer genereId) throws Exception {
+
         genereRepository.deleteById(genereId);
+        if(entityManager.find(Genere.class, genereId)!=null){
+            throw new Exception();
+        }
     }
     @Transactional
     public GenereDto nuovo(GenereDto genereDto) throws BadRequestException {

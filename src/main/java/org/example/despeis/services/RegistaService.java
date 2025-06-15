@@ -1,5 +1,7 @@
 package org.example.despeis.services;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.dto.RegistaDto;
@@ -7,6 +9,7 @@ import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.dto.RegistaDto;
 import org.example.despeis.mapper.RegistaMapper;
 import org.example.despeis.model.Attore;
+import org.example.despeis.model.Film;
 import org.example.despeis.model.Regista;
 import org.example.despeis.model.Regista;
 import org.example.despeis.repository.RegistaRepository;
@@ -24,7 +27,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class RegistaService {
-
+    @PersistenceContext
+    EntityManager entityManager;
     private final RegistaRepository registaRepository;
     private final RegistaMapper registaMapper;
     @Autowired
@@ -33,12 +37,16 @@ public class RegistaService {
         this.registaRepository=registaRepository;
     }
     @Transactional
-    public void delete(RegistaDto registaDto){
-        registaRepository.deleteById(registaDto.getId());
+    public void delete(RegistaDto registaDto) throws Exception {
+        delete(registaDto.getId());
     }
     @Transactional
-    public void delete(Integer registaId){
+    public void delete(Integer registaId) throws Exception {
+
         registaRepository.deleteById(registaId);
+        if(entityManager.find(Regista.class, registaId)!=null){
+            throw new Exception();
+        }
     }
     @Transactional
     public RegistaDto nuovo(RegistaDto registaDto) throws BadRequestException {

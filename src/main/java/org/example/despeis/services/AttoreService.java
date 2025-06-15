@@ -1,8 +1,11 @@
 package org.example.despeis.services;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.AttoreDto;
 import org.example.despeis.dto.PaginatedResponse;
+
 import org.example.despeis.mapper.AttoreMapper;
 import org.example.despeis.model.Attore;
 import org.example.despeis.repository.AttoreRepository;
@@ -21,7 +24,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class AttoreService {
-
+    @PersistenceContext
+    private EntityManager entityManager;
     private final AttoreRepository attoreRepository;
     private final AttoreMapper attoreMapper;
     private final AttorefilmRepository attorefilmRepository;
@@ -47,13 +51,18 @@ public class AttoreService {
 
     }
     @Transactional
-    public void delete(AttoreDto attoreDto){
-
+    public void delete(AttoreDto attoreDto) throws Exception {
         attoreRepository.deleteById(attoreDto.getId());
+
+
     }
     @Transactional
-    public void delete(Integer attoreId){
+    public void delete(Integer attoreId) throws Exception {
+
         attoreRepository.deleteById(attoreId);
+        if(entityManager.find(Attore.class, attoreId)!=null){
+            throw new Exception();
+        }
     }
     @Transactional
     public AttoreDto nuovo(AttoreDto attoreDto) throws BadRequestException {

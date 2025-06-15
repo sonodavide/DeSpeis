@@ -6,6 +6,7 @@ import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.FilmDto;
 import org.example.despeis.dto.PaginatedResponse;
+
 import org.example.despeis.mapper.AttoreMapper;
 import org.example.despeis.mapper.FilmMapper;
 import org.example.despeis.mapper.GenereMapper;
@@ -175,11 +176,14 @@ public class FilmService {
 
     }
     @Transactional
-    public FilmDto elimina(FilmDto film){
+    public FilmDto elimina(FilmDto film) throws Exception {
         Film f = entityManager.find(Film.class, film.getId());
         if(!spettacoloRepository.findProssimiSpettacoliByFilm(f).isEmpty()) throw new IllegalStateException();
         entityManager.createQuery("UPDATE Spettacolo s SET s.film = null WHERE s.film = :film").setParameter("film", f).executeUpdate();
         filmRepository.deleteById(film.getId());
+        if(entityManager.find(Film.class, film.getId())!=null){
+            throw new Exception();
+        }
         return film;
     }
 
