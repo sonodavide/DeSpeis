@@ -102,4 +102,9 @@ public class SalaService {
         return salaConPostiMapper.toDto(salaRepository.findById(salaId).orElseThrow());
 
     }
+
+    @Transactional(readOnly = true)
+    public Long count(){
+        return salaRepository.count();
+    }
 }

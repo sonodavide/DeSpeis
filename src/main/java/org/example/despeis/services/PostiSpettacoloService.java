@@ -59,14 +59,22 @@ public class PostiSpettacoloService {
     }
 
     @Transactional
-    public boolean blocca(Set<Integer> postoId) throws Exception{
-        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndLiberi(postoId);
-        if(p.size()!=postoId.size()) throw new Exception("posto/i già prenotati");
+    public PostiSpettacoloResponseDto blocca(PrenotazioneRequestDto prenotazioneRequestDto) throws Exception{
+        if(prenotazioneRequestDto.getPostiIds().size()==0){
+            throw new Exception("Errore lista vuota");
+        }
+        List<Postispettacolo> p = postiSpettacoloRepository.findByPostiIdsAndNotPrenotati(prenotazioneRequestDto.getPostiIds());
+
+        if(p.size()!=prenotazioneRequestDto.getPostiIds().size()) throw new Exception("posto/i già prenotati");
         for(Postispettacolo posto : p){
-            posto.setStato("bloccato");
+            if(posto.getStato().equals("bloccato")){
+                posto.setStato("libero");
+            } else {
+                posto.setStato("bloccato");
+            }
         }
         postiSpettacoloRepository.saveAll(p);
-        return true;
+        return getBySpettacoloId(p.get(0).getSpettacolo().getId());
     }
     @Transactional
     public boolean prenota(PrenotazioneRequestDto prenotazione) throws Exception{

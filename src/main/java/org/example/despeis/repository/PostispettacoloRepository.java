@@ -21,6 +21,10 @@ public interface PostispettacoloRepository extends JpaRepository<Postispettacolo
     @Query("SELECT p FROM Postispettacolo p WHERE p.id IN :postiIds AND p.stato ='libero' ")
     public List<Postispettacolo> findByPostiIdsAndLiberi(@Param("postiIds") Set<Integer> postiIds);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Postispettacolo p WHERE p.id IN :postiIds AND p.stato !='prenotato' ")
+    public List<Postispettacolo> findByPostiIdsAndNotPrenotati(@Param("postiIds") Set<Integer> postiIds);
+
 
 
 

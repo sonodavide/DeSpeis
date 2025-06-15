@@ -68,4 +68,9 @@ public class RegistaService {
                 result.getContent().stream().map(registaMapper::toDto).collect(Collectors.toList()),
                 result.getTotalPages(), result.getTotalElements());
     }
+
+    @Transactional(readOnly = true)
+    public Long count(){
+        return registaRepository.count();
+    }
 }

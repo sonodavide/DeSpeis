@@ -65,4 +65,9 @@ public class AttoreService {
                 result.getTotalPages(), result.getTotalElements()
         );
     }
+
+    @Transactional(readOnly = true)
+    public Long count(){
+        return attoreRepository.count();
+    }
 }

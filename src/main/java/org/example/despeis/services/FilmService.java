@@ -129,12 +129,12 @@ public class FilmService {
     }
 
     @Transactional(readOnly = true)
-    public List<FilmDto> ricerca(String query,Integer pageNumber, Integer pageSize ){
+    public PaginatedResponse<FilmDto> ricerca(String query,Integer pageNumber, Integer pageSize ){
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("titolo"));
         String searchTerm = query.toLowerCase() + "%";
         Page<Film> result = filmRepository.cerca(searchTerm, pageable);
 
-        return result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList());
+        return new PaginatedResponse<>(result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 
     @Transactional(readOnly = true)
@@ -145,4 +145,8 @@ public class FilmService {
         return new PaginatedResponse<>(result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
+    public Long count(){
+        return filmRepository.count();
+    }
 }

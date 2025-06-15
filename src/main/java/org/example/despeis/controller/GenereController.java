@@ -52,4 +52,13 @@ public class GenereController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<?> count(){
+        try{
+            return ResponseEntity.ok(genereService.count());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

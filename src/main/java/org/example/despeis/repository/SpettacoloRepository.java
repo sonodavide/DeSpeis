@@ -19,13 +19,14 @@ public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer>
     public Page<Spettacolo> findAllByDataOrderByFilmTitoloAscOraAsc(LocalDate data, Pageable pageable);
     public List<Spettacolo> findAllByDataAndAcquistabileOrderByFilmTitoloAscOraAsc(LocalDate data, Boolean acquistabile);
     @Lock(LockModeType.PESSIMISTIC_READ) // Aggiunge un lock pessimistico in lettura
-    @Query("SELECT s.id FROM Spettacolo s WHERE s.sala.id = :sala AND s.data = :data AND " +
-            "((:oraInizio BETWEEN s.ora AND s.oraFine) OR " +
-            "(:oraFine BETWEEN s.ora AND s.oraFine) OR " +
-            "(s.ora BETWEEN :oraInizio AND :oraFine))")
-    List<Spettacolo> findConflictingSpettacoli(@Param("sala") Integer sala,
+    @Query("SELECT s.id FROM Spettacolo s WHERE s.sala.id = :sala AND (\n" +
+            "                function('DATE_TIME', s.data, s.ora) <= function('DATE_TIME', :dataFine, :oraFine) AND\n" +
+            "                function('DATE_TIME', s.dataFine, s.oraFine) >= function('DATE_TIME', :dataInizio, :oraInizio)\n" +
+            "            )")
+    List<Integer> findConflictingSpettacoli(@Param("sala") Integer sala,
                                                @Param("data") LocalDate data,
                                                @Param("oraInizio") LocalTime oraInizio,
+                                               @Param("dataFine") LocalDate dataFine,
                                                @Param("oraFine") LocalTime oraFine);
 
     List<Spettacolo> findByAcquistabile(boolean b);

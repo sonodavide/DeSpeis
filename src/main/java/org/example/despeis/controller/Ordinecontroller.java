@@ -31,4 +31,21 @@ public class Ordinecontroller {
         }
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<?> count(){
+        try{
+            return ResponseEntity.ok(ordineService.count());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/incassiTotali")
+    public ResponseEntity<?> incassiTotali(){
+        try{
+            return ResponseEntity.ok(ordineService.incassiTotali());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

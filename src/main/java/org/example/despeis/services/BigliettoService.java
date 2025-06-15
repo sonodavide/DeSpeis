@@ -68,4 +68,9 @@ public class BigliettoService {
                 .map(bigliettoMapper::toDto)
                 .collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
+
+    @Transactional(readOnly = true)
+    public Long count(){
+        return bigliettoRepository.count();
+    }
 }

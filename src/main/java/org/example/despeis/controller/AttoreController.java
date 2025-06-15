@@ -62,4 +62,13 @@ public class AttoreController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<?> count(){
+        try{
+            return ResponseEntity.ok(attoreService.count());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
