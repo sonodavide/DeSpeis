@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
+
 @RestController
 @RequestMapping("/film")
 public class FilmController {
@@ -24,9 +26,11 @@ public class FilmController {
         ResponseEntity<?> r;
         try{
 
-            r = id==null ? ResponseEntity.ok(filmService.getAll()) : ResponseEntity.ok(filmService.getById(id));
-        }catch (Exception e){
+            r = ResponseEntity.ok(filmService.getById(id));
+        }catch (NoSuchElementException e){
             r= ResponseEntity.notFound().build();
+        }catch (Exception e){
+            r = ResponseEntity.internalServerError().build();
         }
         return r;
     }

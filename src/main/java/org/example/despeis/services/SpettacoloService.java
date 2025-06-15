@@ -1,6 +1,7 @@
 package org.example.despeis.services;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.*;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -127,7 +130,7 @@ public class SpettacoloService {
     @Transactional
     public Spettacolo aggiungiSpettacolo(NuovoSpettacoloDto nuovoSpettacolo) throws Exception {
         //mettere che si può cambiare il prezzo del biglietto anche se ci sta gente prenotata
-        if(nuovoSpettacolo.getPrezzo()<0) throw new BadRequestException();
+        if(nuovoSpettacolo.getPrezzo().compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException();
         Spettacolo s;
             if (nuovoSpettacolo.getId() == null) {
                 s = new Spettacolo();
@@ -142,8 +145,9 @@ public class SpettacoloService {
             s.setPrezzo(nuovoSpettacolo.getPrezzo());
 
             if(nuovoSpettacolo.getFilm()!=null){
-                //Film nuovoFilm = filmMapper.toEntity(nuovoSpettacolo.getFilm()); //qui va messo un lock sul film. Credo proprio optimistic dato che è raro che vengano fatte modifiche
-                Film nuovoFilm = filmRepository.findById(nuovoSpettacolo.getFilm().getId()).orElseThrow(() -> new BadRequestException());
+                
+                Film nuovoFilm = entityManager.find(Film.class, nuovoSpettacolo.getFilm().getId(), LockModeType.PESSIMISTIC_READ);
+                //Film nuovoFilm = filmRepository.findById(nuovoSpettacolo.getFilm().getId()).orElseThrow(() -> new BadRequestException());
                 if(s.getFilm()==null || !s.getFilm().equals(nuovoFilm)){
                     Duration durata = Duration.ofMinutes(nuovoFilm.getDurata());
                     LocalDateTime inizio = LocalDateTime.of(nuovoSpettacolo.getData(), nuovoSpettacolo.getOra());
@@ -159,7 +163,7 @@ public class SpettacoloService {
                             fine.toLocalTime());
                     if(!spettacoliProblematici.isEmpty()){
                         System.out.println("sala occupata a quell'ora");
-                        throw new Exception("La sala è occupata in quell'orario.");
+                        throw new BadRequestException("La sala è occupata in quell'orario.");
                     }
                     s.setFilm(nuovoFilm);
                 }

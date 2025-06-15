@@ -93,7 +93,7 @@ public class PostiSpettacoloService {
             Ordine ordine = new Ordine();
             ordine.setData(LocalDate.now());
             ordine.setStato("confermato");
-            Utente utente = utenteRepository.findById(userId).orElseThrow();
+            Utente utente = utenteRepository.findById(userId).orElseThrow(() -> new BadRequestException("utente non valido"));
 
             ordine = ordineRepository.save(ordine);
             for(Postispettacolo posto : p){

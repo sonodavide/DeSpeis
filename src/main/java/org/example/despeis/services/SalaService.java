@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,7 +72,7 @@ public class SalaService {
                 controllo se ci sono spettacoli acquistabili con questa sala. In caso,
                 ne impedisco la modifica.
                 */
-                if(spettacoloRepository.findFirstBySalaAndAcquistabileTrue(nuovaSala)!=null) throw new Exception();
+                if(spettacoloRepository.findFirstBySalaAndAcquistabileTrue(nuovaSala)!=null) throw new BadRequestException();
             }
             Sala sala = salaRepository.save(nuovaSala);
 
@@ -100,7 +101,7 @@ public class SalaService {
 
     @Transactional(readOnly = true)
     public SalaConPostiDto getSalaConPostiPerFila(Integer salaId){
-        return salaConPostiMapper.toDto(salaRepository.findById(salaId).orElseThrow());
+        return salaConPostiMapper.toDto(salaRepository.findById(salaId).orElseThrow(() -> new NoSuchElementException()));
 
     }
 
