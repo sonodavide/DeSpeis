@@ -23,6 +23,10 @@ public class Utils {
         return jwtToken.getToken().getClaimAsString("family_name");
     }
 
+    public static String getUsername(JwtAuthenticationToken jwtToken){
+        return jwtToken.getToken().getClaimAsString("preferred_username");
+    }
+
 
 
 }

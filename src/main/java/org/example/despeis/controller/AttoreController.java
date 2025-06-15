@@ -72,4 +72,13 @@ public class AttoreController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/getNomeById")
+    public ResponseEntity<?> getNomeById(@RequestParam Integer id){
+        try{
+            return ResponseEntity.ok(attoreService.getNomeById(id));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

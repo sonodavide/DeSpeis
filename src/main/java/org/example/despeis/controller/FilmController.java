@@ -80,4 +80,13 @@ public class FilmController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("cercaTag")
+    public ResponseEntity<?> getCercaTag(@RequestParam String tag, @RequestParam Integer id, @RequestParam(name="pageNumber", defaultValue = "0") int pageNumber, @RequestParam(name="pageSize", defaultValue = "5") int pageSize){
+        try{
+            return ResponseEntity.ok(filmService.cercaTag(tag, id, pageNumber, pageSize));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

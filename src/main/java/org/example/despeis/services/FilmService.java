@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -148,5 +149,25 @@ public class FilmService {
     @Transactional(readOnly = true)
     public Long count(){
         return filmRepository.count();
+    }
+    @Transactional(readOnly = true)
+    public PaginatedResponse<FilmDto> cercaTag(String tag, Integer id, Integer pageNumber, Integer pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("titolo"));
+        Page<Film> result;
+        switch (tag){
+            case "genere":
+                result = filmRepository.findAllByGeneresId(id, pageable);
+                break;
+            case "attore":
+                result = filmRepository.findAllByAttoresId(id, pageable);
+                break;
+            case "regista":
+                result = filmRepository.findAllByRegistasId(id, pageable);
+                break;
+            default:
+                throw new NoSuchElementException();
+        }
+
+        return new PaginatedResponse<>(result.getContent().stream().map(filmMapper::toDto).collect(Collectors.toList()), result.getTotalPages(), result.getTotalElements());
     }
 }

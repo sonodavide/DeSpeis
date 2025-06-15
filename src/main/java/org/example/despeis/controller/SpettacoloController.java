@@ -24,7 +24,7 @@ public class SpettacoloController {
         this.spettacoloService = spettacoloService;
     }
 
-    //QUESTO E' QUELLO DEL SITO.
+    //QUESTO E' QUELLO DEL SITO PER GLI UTENTI NORMALI.
     @PostMapping("/byDate")
     public ResponseEntity<?> getFilmSpettacoloByDate(@RequestParam("date") String date){
         LocalDate d = LocalDate.parse(date);

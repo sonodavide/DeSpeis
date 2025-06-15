@@ -19,11 +19,11 @@ public class Utente {
     @Column(name = "username", nullable = false, length = Integer.MAX_VALUE)
     private String username;
 
-    @Column(name = "nome", nullable = false, length = Integer.MAX_VALUE)
-    private String nome;
+    @Column(name = "firstname", nullable = false, length = Integer.MAX_VALUE)
+    private String firstname;
 
-    @Column(name = "cognome", nullable = false, length = Integer.MAX_VALUE)
-    private String cognome;
+    @Column(name = "lastname", nullable = false, length = Integer.MAX_VALUE)
+    private String lastname;
 
     @Column(name = "email", nullable = false, length = Integer.MAX_VALUE)
     private String email;

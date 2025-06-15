@@ -87,4 +87,15 @@ public class UtenteService {
     public Long count(){
         return utenteRepository.count();
     }
+
+    @Transactional
+    public void update(JwtAuthenticationToken authenticationToken){
+        Utente utente = new Utente();
+        utente.setId(Utils.getUserId(authenticationToken));
+        utente.setUsername(Utils.getUsername(authenticationToken));
+        utente.setFirstname(Utils.getFirstName(authenticationToken));
+        utente.setEmail(Utils.getEmail(authenticationToken));
+        utente.setLastname(Utils.getLastName(authenticationToken));
+        utenteRepository.save(utente);
+    }
 }

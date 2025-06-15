@@ -44,7 +44,7 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
         String email = (String) source.getClaim("email");
         Utente c = new Utente();
         //c.setId(userId);
-        c.setNome(firstName);
+        c.setFirstname(firstName);
         /*
         if (utenteService.findCustomerById(userId).isEmpty()) {
             customerService.saveCustomer(c);

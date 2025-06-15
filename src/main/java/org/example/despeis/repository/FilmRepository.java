@@ -1,5 +1,6 @@
 package org.example.despeis.repository;
 
+import org.example.despeis.model.Attore;
 import org.example.despeis.model.Film;
 import org.example.despeis.model.Genere;
 import org.springframework.data.domain.Page;
@@ -19,4 +20,7 @@ public interface FilmRepository extends JpaRepository<Film, Integer> {
             "f.titolo ILIKE :searchTerm ")
     Page<Film> cerca(@Param("searchTerm") String searchTerm, Pageable pageable
     );
+    Page<Film> findAllByGeneresId(Integer genereId, Pageable pageable);
+    Page<Film> findAllByRegistasId(Integer registaId, Pageable pageable);
+    Page<Film> findAllByAttoresId(Integer attoreId, Pageable pageable);
 }
