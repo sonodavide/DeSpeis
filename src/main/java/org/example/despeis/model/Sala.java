@@ -27,4 +27,7 @@ public class Sala {
     @Version
     private Integer version;
 
+    @Column(name = "nome")
+    private Integer nome;
+
 }

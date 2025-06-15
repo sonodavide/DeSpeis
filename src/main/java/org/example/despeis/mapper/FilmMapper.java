@@ -5,6 +5,8 @@ import org.example.despeis.model.Film;
 import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)public interface FilmMapper {
+    @Mapping(target = "titolo", expression = "java(filmDto.getTitolo().trim())")
+    @Mapping(target = "trama", expression = "java(filmDto.getTrama().trim())")
     Film toEntity(FilmDto filmDto);
 
     FilmDto toDto(Film film);

@@ -66,6 +66,7 @@ public class AttoreService {
     }
     @Transactional
     public AttoreDto nuovo(AttoreDto attoreDto) throws BadRequestException {
+
         if(attoreDto.getCognome().trim().equals("") || attoreDto.getNome().trim().equals("")) throw new BadRequestException();
         return attoreMapper.toDto(attoreRepository.save(attoreMapper.toEntity(attoreDto)));
     }
