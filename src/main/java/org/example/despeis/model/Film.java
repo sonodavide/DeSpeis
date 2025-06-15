@@ -58,4 +58,9 @@ public class Film {
     @OneToMany(mappedBy = "film", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private Set<Generefilm> generefilms = new LinkedHashSet<>();
 
+    @ColumnDefault("0")
+    @Column(name = "version")
+    @Version
+    private Integer version;
+
 }

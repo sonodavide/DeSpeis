@@ -26,6 +26,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.getById(authenticationToken));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -36,6 +37,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.getAll());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -49,6 +51,7 @@ public class UtenteController {
             return ResponseEntity.notFound().build();
         }
         catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -60,6 +63,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -80,6 +84,7 @@ public class UtenteController {
         try{
             return ResponseEntity.ok(utenteService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -91,6 +96,7 @@ public class UtenteController {
             utenteService.update(authenticationToken);
             return ResponseEntity.ok().build();
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

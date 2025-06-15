@@ -3,6 +3,7 @@ package org.example.despeis.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -29,5 +30,10 @@ public class Attore {
             joinColumns = @JoinColumn(name = "attore"),
             inverseJoinColumns = @JoinColumn(name = "film"))
     private Set<Film> films = new LinkedHashSet<>();
+
+    @ColumnDefault("0")
+    @Column(name = "version")
+    @Version
+    private Integer version;
 
 }

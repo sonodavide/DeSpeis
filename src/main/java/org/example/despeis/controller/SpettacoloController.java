@@ -1,5 +1,6 @@
 package org.example.despeis.controller;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.coyote.BadRequestException;
 import org.example.despeis.dto.NuovoSpettacoloDto;
 import org.example.despeis.dto.SpettacoloDto;
@@ -9,9 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/spettacolo")
@@ -58,6 +62,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.elimina(spettacolo));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -67,6 +72,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(postiSpettacoloService.getBySpettacoloId(spettacoloId));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -88,6 +94,7 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -99,8 +106,38 @@ public class SpettacoloController {
         try{
             return ResponseEntity.ok(spettacoloService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/getById")
+    public ResponseEntity<?> getById(@NotNull @RequestParam Integer id){
+        try{
+            return ResponseEntity.ok(spettacoloService.getById(id));
+        }catch (NoSuchElementException e){
+            return ResponseEntity.notFound().build();
+        }
+        catch (Exception e){
+e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+
+
+    @GetMapping("/getByIdAcquistabile")
+    public ResponseEntity<?> getByIdAcquistabile(@NotNull @RequestParam Integer id){
+        try{
+            return ResponseEntity.ok(spettacoloService.getByIdAcquistabile(id));
+        }catch (NoSuchElementException e){
+            return ResponseEntity.notFound().build();
+        }
+        catch (Exception e){
+e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 
 }

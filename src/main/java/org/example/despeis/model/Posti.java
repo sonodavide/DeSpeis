@@ -3,6 +3,7 @@ package org.example.despeis.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -24,5 +25,10 @@ public class Posti {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sala", nullable = false)
     private Sala sala;
+
+    @ColumnDefault("0")
+    @Column(name = "version")
+    @Version
+    private Integer version;
 
 }

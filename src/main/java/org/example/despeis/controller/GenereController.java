@@ -26,6 +26,7 @@ public class GenereController {
             return ResponseEntity.badRequest().build();
         }
         catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -36,6 +37,7 @@ public class GenereController {
             genereService.delete(genereDto);
             return ResponseEntity.ok("ok");
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -55,6 +57,7 @@ public class GenereController {
         try{
             return ResponseEntity.ok(genereService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -64,6 +67,7 @@ public class GenereController {
         try{
             return ResponseEntity.ok(genereService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -72,6 +76,7 @@ public class GenereController {
         try{
             return ResponseEntity.ok(genereService.getNomeById(id));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

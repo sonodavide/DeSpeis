@@ -26,6 +26,7 @@ public class RegistaController {
             return ResponseEntity.badRequest().build();
         }
         catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -36,6 +37,7 @@ public class RegistaController {
             registaService.delete(registaDto);
             return ResponseEntity.ok("ok");
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -54,6 +56,7 @@ public class RegistaController {
         try{
             return ResponseEntity.ok(registaService.getAllPaginated(pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -64,6 +67,7 @@ public class RegistaController {
         try{
             return ResponseEntity.ok(registaService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -72,6 +76,7 @@ public class RegistaController {
         try{
             return ResponseEntity.ok(registaService.getNomeById(id));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

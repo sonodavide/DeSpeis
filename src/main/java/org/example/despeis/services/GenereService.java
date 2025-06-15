@@ -32,7 +32,7 @@ public class GenereService {
     }
     @Transactional
     public void delete(GenereDto genereDto){
-        genereRepository.delete(genereMapper.toEntity(genereDto));
+        genereRepository.deleteById(genereDto.getId());
     }
     @Transactional
     public void delete(Integer genereId){

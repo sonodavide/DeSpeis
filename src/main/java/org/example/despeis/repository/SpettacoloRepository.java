@@ -18,25 +18,33 @@ import java.util.List;
 public interface SpettacoloRepository extends JpaRepository<Spettacolo, Integer> {
 
     public Page<Spettacolo> findAllByDataOrderByFilmTitoloAscOraAsc(LocalDate data, Pageable pageable);
+
     public List<Spettacolo> findAllByDataAndAcquistabileOrderByFilmTitoloAscOraAsc(LocalDate data, Boolean acquistabile);
-    @Lock(LockModeType.PESSIMISTIC_READ) // Aggiunge un lock pessimistico in lettura
-    @Query("SELECT s.id FROM Spettacolo s WHERE s.sala.id = :sala AND (\n" +
-            "                function('DATE_TIME', s.data, s.ora) <= function('DATE_TIME', :dataFine, :oraFine) AND\n" +
-            "                function('DATE_TIME', s.dataFine, s.oraFine) >= function('DATE_TIME', :dataInizio, :oraInizio)\n" +
-            "            )")
+    @Lock(LockModeType.OPTIMISTIC)
+    @Query("SELECT s.id " +
+            "FROM Spettacolo s " +
+            "WHERE s.sala.id = :sala AND (" +
+            "(:dataInizio >= s.data AND :oraInizio >= s.ora AND :dataFine <= s.dataFine AND :oraFine <= s.oraFine) OR " +
+            "(:dataInizio <= s.data AND :oraInizio <= s.ora AND :dataFine >= s.data AND :oraFine >= s.ora) OR " +
+            "(:dataInizio <= s.dataFine AND :oraInizio <= s.oraFine AND :oraFine >= s.oraFine AND :dataFine >= s.dataFine) OR " +
+            "(:dataInizio <= s.data AND :oraInizio <= s.ora AND :dataFine >= s.dataFine AND :oraFine >= s.oraFine)" +
+            ")")
     List<Integer> findConflictingSpettacoli(@Param("sala") Integer sala,
-                                               @Param("data") LocalDate data,
+                                               @Param("dataInizio") LocalDate data,
                                                @Param("oraInizio") LocalTime oraInizio,
                                                @Param("dataFine") LocalDate dataFine,
                                                @Param("oraFine") LocalTime oraFine);
-
-    List<Spettacolo> findByAcquistabile(boolean b);
-
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE and s.acquistabile=true")
+    List<Spettacolo> findSpettacoliAcquistabili();
+    @Lock(LockModeType.OPTIMISTIC)
+    @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE and s.acquistabile=true and s.id = :id")
+    Spettacolo findSpettacoloAcquistabileById(int id);
     Spettacolo findFirstBySalaAndAcquistabileTrue(Sala sala);
 
     @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE")
     List<Spettacolo> findProssimiSpettacoli();
 
+    @Lock(LockModeType.OPTIMISTIC)
     @Query("SELECT s FROM Spettacolo s WHERE s.data >= CURRENT_DATE and s.film = :film ")
     List<Spettacolo> findProssimiSpettacoliByFilm(Film film);
 

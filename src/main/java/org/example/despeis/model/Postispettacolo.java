@@ -3,6 +3,7 @@ package org.example.despeis.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -27,5 +28,10 @@ public class Postispettacolo {
 
     @Column(name = "fila", nullable = false, length = Integer.MAX_VALUE)
     private String fila;
+
+    @ColumnDefault("0")
+    @Column(name = "version")
+    @Version
+    private Integer version;
 
 }

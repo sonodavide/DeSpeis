@@ -9,6 +9,8 @@ import org.hibernate.annotations.ColumnDefault;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -46,5 +48,14 @@ public class Spettacolo {
 
     @Column(name = "\"ora fine\"")
     private LocalTime oraFine;
+
+    @ColumnDefault("0")
+    @Column(name = "version")
+    @Version
+    private Integer version;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "spettacolo", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private Set<Postispettacolo> postispettacolos = new LinkedHashSet<>();
 
 }

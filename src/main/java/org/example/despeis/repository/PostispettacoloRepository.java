@@ -13,8 +13,8 @@ import java.util.Set;
 public interface PostispettacoloRepository extends JpaRepository<Postispettacolo, Integer> {
     public List<Postispettacolo> findAllBySpettacoloIdOrderByFilaAscSedileAsc(int spettacolo);
 
-    @Lock(LockModeType.PESSIMISTIC_READ)
-    public List<Postispettacolo> findBySpettacoloIdAndStato(int spettacoloId, String stato);
+    @Lock(LockModeType.OPTIMISTIC)
+    public List<Postispettacolo> findBySpettacoloId(int spettacoloId);
     public List<Postispettacolo> deleteBySpettacoloId(int spettacoloId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

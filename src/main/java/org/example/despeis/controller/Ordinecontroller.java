@@ -26,6 +26,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.getAllByUserPaginated(authenticationToken, pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -37,6 +38,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.getAllByUserPaginated(userId, pageNumber, pageSize));
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -46,6 +48,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.count());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -55,6 +58,7 @@ public class Ordinecontroller {
         try{
             return ResponseEntity.ok(ordineService.incassiTotali());
         }catch (Exception e){
+e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

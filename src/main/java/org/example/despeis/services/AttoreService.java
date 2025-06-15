@@ -6,6 +6,7 @@ import org.example.despeis.dto.PaginatedResponse;
 import org.example.despeis.mapper.AttoreMapper;
 import org.example.despeis.model.Attore;
 import org.example.despeis.repository.AttoreRepository;
+import org.example.despeis.repository.AttorefilmRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,11 +24,13 @@ public class AttoreService {
 
     private final AttoreRepository attoreRepository;
     private final AttoreMapper attoreMapper;
+    private final AttorefilmRepository attorefilmRepository;
 
     @Autowired
-    public AttoreService(AttoreRepository attoreRepository, AttoreMapper attoreMapper) {
+    public AttoreService(AttoreRepository attoreRepository, AttoreMapper attoreMapper, AttorefilmRepository attorefilmRepository) {
         this.attoreMapper=attoreMapper;
         this.attoreRepository=attoreRepository;
+        this.attorefilmRepository = attorefilmRepository;
     }
 
     @Transactional
@@ -45,7 +48,8 @@ public class AttoreService {
     }
     @Transactional
     public void delete(AttoreDto attoreDto){
-        attoreRepository.delete(attoreMapper.toEntity(attoreDto));
+
+        attoreRepository.deleteById(attoreDto.getId());
     }
     @Transactional
     public void delete(Integer attoreId){

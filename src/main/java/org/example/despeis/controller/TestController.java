@@ -2,6 +2,7 @@ package org.example.despeis.controller;
 
 import org.example.despeis.security.Utils;
 import org.example.despeis.services.FilmService;
+import org.example.despeis.services.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,8 @@ public class TestController {
 
     @Autowired
     FilmService filmService;
+    @Autowired
+    TestService testService;
     @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<?> test(JwtAuthenticationToken auth) {
@@ -33,9 +36,9 @@ public class TestController {
     }
 
     @GetMapping("/casca")
-    public ResponseEntity<?> casca(@RequestParam int id){
+    public ResponseEntity<?> casca(){
         try {
-        filmService.elimina(id);
+        testService.casca();
         return ResponseEntity.ok("fatto");
         }catch (Exception e){
             e.printStackTrace();
@@ -43,4 +46,16 @@ public class TestController {
 
         }
     }
+    @GetMapping("/lockTest")
+    public ResponseEntity<?> loca(@RequestParam int durata){
+        try {
+            testService.testOptLock(durata);
+            return ResponseEntity.ok("fatto");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.ok("no");
+
+        }
+    }
+
 }
