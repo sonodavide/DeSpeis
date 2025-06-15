@@ -37,8 +37,6 @@ public class Film {
     @ManyToMany(mappedBy = "films")
     private Set<Regista> registas = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "film")
-    private Set<Spettacolo> spettacolos = new LinkedHashSet<>();
 
     @Column(name = "img", length = Integer.MAX_VALUE)
     private String img;

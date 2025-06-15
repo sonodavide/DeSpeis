@@ -18,12 +18,5 @@ public class SalaController {
         this.salaService = salaService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> getSalaBySpettacoloId(@RequestParam("id") Integer id){
-        try{
-            return ResponseEntity.ok(salaService.getSaleBySpettacoloId(id));
-        }catch (Exception e){
-            return ResponseEntity.badRequest().build();
-        }
-    }
+
 }

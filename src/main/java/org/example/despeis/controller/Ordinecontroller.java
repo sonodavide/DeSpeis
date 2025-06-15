@@ -21,21 +21,16 @@ public class Ordinecontroller {
         this.ordineService = ordineService;
     }
 
-    @GetMapping
-    public ResponseEntity<?> getOrdini(){
-        try{
-            return ResponseEntity.ok(ordineService.getAll());
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+
 
     @GetMapping
-    public ResponseEntity<?> getOrdine(@RequestParam("user") int userId){
+    public ResponseEntity<?> getOrdine(@RequestParam(name="user", required = false) Integer userId){
+        ResponseEntity<?> r;
         try{
-            return ResponseEntity.ok(ordineService.getById(userId));
+            r = userId==null ? ResponseEntity.ok(ordineService.getAll()) : ResponseEntity.ok(ordineService.getById(userId));
         }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            r= ResponseEntity.badRequest().body(e.getMessage());
         }
+        return r;
     }
 }
